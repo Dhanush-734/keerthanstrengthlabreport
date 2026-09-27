@@ -612,8 +612,14 @@ document.addEventListener('DOMContentLoaded', () => {
   async function openPreviewModal() {
     previewModal.classList.add('open');
     previewLoading.classList.add('active');
-    previewImg1.style.display = 'none';
-    previewImg2.style.display = 'none';
+    if (previewImg1) {
+      previewImg1.style.display = 'none';
+      previewImg1.classList.remove('active');
+    }
+    if (previewImg2) {
+      previewImg2.style.display = 'none';
+      previewImg2.classList.remove('active');
+    }
 
     const data = getFormDataObject();
 
@@ -712,12 +718,27 @@ document.addEventListener('DOMContentLoaded', () => {
       tab.classList.toggle('active', tab.dataset.page === String(pageNum));
     });
     if (pageNum === 1) {
-      previewImg1.style.display = 'block';
-      previewImg2.style.display = 'none';
+      if (previewImg1) {
+        previewImg1.classList.add('active');
+        previewImg1.style.display = 'block';
+      }
+      if (previewImg2) {
+        previewImg2.classList.remove('active');
+        previewImg2.style.display = 'none';
+      }
     } else {
-      previewImg1.style.display = 'none';
-      previewImg2.style.display = 'block';
+      if (previewImg1) {
+        previewImg1.classList.remove('active');
+        previewImg1.style.display = 'none';
+      }
+      if (previewImg2) {
+        previewImg2.classList.add('active');
+        previewImg2.style.display = 'block';
+      }
     }
+
+    const viewer = document.querySelector('.preview-viewer');
+    if (viewer) viewer.scrollTop = 0;
   }
 
   previewTabs.forEach(tab => {

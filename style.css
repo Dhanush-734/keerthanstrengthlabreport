@@ -1401,20 +1401,23 @@ body {
 .preview-stage {
   width: 100%;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   padding: 16px;
 }
 
 .preview-img {
   max-width: 100%;
-  max-height: 600px;
+  max-height: 720px;
+  height: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
   border-radius: 4px;
-  display: none;
+  display: none !important;
 }
 
 .preview-img.active {
-  display: block;
+  display: block !important;
 }
 
 .preview-loading {
@@ -2060,6 +2063,10 @@ body {
   .preview-stage {
     padding: 6px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .preview-img {
@@ -2067,7 +2074,7 @@ body {
     max-width: 100% !important;
     height: auto !important;
     max-height: none !important;
-    display: none;
+    display: none !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   }
 
