@@ -1,0 +1,43 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Test outputs and temporary preview renders
+test_*.png
+crop_*.png
+verify_*.png
+preview_page1_test.png
+page_1.png
+page_2.png
+*.webp
+Keerthan_Strength_Lab_Client_Screening_Form_TEST_FILLED.pdf
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

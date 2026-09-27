@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keerthan Strength Lab | Client Screening & Fitness Assessment</title>
+  <meta name="description"
+    content="Official client screening, PAR-Q health questionnaire, and fitness assessment portal for Keerthan Strength Lab. Fill, preview, and download official PDF.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PDF-Lib for Client-side PDF Building -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- PDF.js for Client-side Vector Preview Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+</head>
+
+<body>
+
+  <!-- =========================================================================
+       CINEMATIC LUXURY LOADING SCREEN (#050505) - KEERTHAN STRENGTH LAB
+       ========================================================================= -->
+  <div id="cinematicLoader" class="cinematic-loader" aria-label="Loading Keerthan Strength Lab" role="status">
+    <!-- Subtle Depth Backdrop with Ambient Laboratory Aura -->
+    <div class="loader-backdrop">
+      <div class="loader-ambient-aura"></div>
+      <div class="loader-vignette"></div>
+      <div class="loader-grid-lines"></div>
+    </div>
+
+    <!-- Center Stage Composition -->
+    <div class="loader-content">
+      
+      <!-- Logo Container with Precision Rotating Ring and Shimmer Sweep -->
+      <div class="loader-logo-wrapper">
+        <!-- Subtle Circular Energy Ring (Precision Science & Strength) -->
+        <svg class="loader-precision-ring" viewBox="0 0 280 280" aria-hidden="true">
+          <defs>
+            <linearGradient id="goldPrecisionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#E6BA55" stop-opacity="1" />
+              <stop offset="50%" stop-color="#F2CD73" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#8E6316" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="140" cy="140" r="130" />
+          <circle class="ring-energy" cx="140" cy="140" r="130" />
+          <circle class="ring-node" cx="140" cy="10" r="3" />
+        </svg>
+
+        <!-- Ambient Glow behind Logo -->
+        <div class="logo-core-glow"></div>
+
+        <!-- The Hero Logo (Preserves 100% exact shape, proportions, and identity) -->
+        <div class="logo-frame">
+          <img src="logo.jpg" alt="Keerthan Strength Lab" class="loader-hero-logo" id="loaderHeroLogo" />
+          <!-- Subtle Metallic Light Sweep -->
+          <div class="logo-light-sweep"></div>
+        </div>
+      </div>
+
+      <!-- Laboratory Typography Reveal -->
+      <div class="loader-brand-group">
+        <h2 class="loader-brand-title">KEERTHAN STRENGTH LAB</h2>
+        <div class="loader-brand-sub">FITNESS &bull; NUTRITION &bull; MINDSET</div>
+      </div>
+
+      <!-- Minimal Precision Loading Bar & Telemetry -->
+      <div class="loader-progress-box">
+        <div class="loader-progress-track">
+          <div class="loader-progress-bar" id="loaderProgressBar"></div>
+        </div>
+        <div class="loader-status-row">
+          <span class="loader-status-text" id="loaderStatusText">INITIALIZING PERFORMANCE LAB</span>
+          <span class="loader-status-percent" id="loaderPercent">0%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Skip Button -->
+    <button type="button" class="loader-skip-btn" id="loaderSkipBtn" aria-label="Enter immediately">
+      <span>ENTER LAB</span> &rarr;
+    </button>
+  </div>
+
+  <!-- Background decorative ambient lighting -->
+  <div class="ambient-glow ambient-glow-1"></div>
+  <div class="ambient-glow ambient-glow-2"></div>
+
+  <!-- Main Container -->
+  <div class="app-layout">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="brand-block">
+          <div class="brand-logo-frame">
+            <img src="logo_rounded_soft.png" alt="Keerthan Strength Lab Logo" class="brand-logo"
+              onerror="this.src='logo.jpg'">
+            <div class="logo-pulse"></div>
+          </div>
+          <div class="brand-titles">
+            <div class="badge-portal">OFFICIAL CLIENT INTAKE PORTAL</div>
+            <h1 class="brand-title">KEERTHAN STRENGTH LAB</h1>
+            <p class="brand-subtitle">FITNESS &bull; NUTRITION &bull; MINDSET &bull; ASSESSMENT</p>
+          </div>
+        </div>
+
+        <!-- Quick Action Bar -->
+        <div class="header-actions">
+          <!-- Theme Toggle Switch -->
+          <button type="button" id="themeToggle" class="btn-theme-toggle" aria-label="Toggle Light and Dark Mode" title="Toggle Light / Dark Mode">
+            <span class="theme-toggle-track">
+              <span class="theme-toggle-icon">🌙</span>
+              <span class="theme-toggle-icon">☀️</span>
+              <span class="theme-toggle-thumb"></span>
+            </span>
+            <span class="theme-toggle-text" id="themeLabel">Dark</span>
+          </button>
+          <button type="button" id="btnSampleData" class="btn btn-secondary" title="Fill with realistic test data">
+            <span class="btn-icon">⚡</span>
+            <span>Sample Data</span>
+          </button>
+          <button type="button" id="btnResetForm" class="btn btn-ghost" title="Clear all fields">
+            <span class="btn-icon">🔄</span>
+            <span>Reset</span>
+          </button>
+          <button type="button" id="btnOpenPreview" class="btn btn-secondary" title="Preview generated PDF">
+            <span class="btn-icon">👁️</span>
+            <span>Preview</span>
+          </button>
+          <button type="button" id="btnDownloadHeader" class="btn btn-gold btn-download-trigger">
+            <span class="btn-icon">📥</span>
+            <span>Download PDF</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Progress Tracker Bar -->
+    <section class="progress-section">
+      <div class="progress-container">
+        <div class="progress-meta">
+          <span class="progress-label">FORM COMPLETION</span>
+          <span class="progress-percent" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+        </div>
+        <!-- Section Quick Nav Dots -->
+        <nav class="section-nav" aria-label="Sections">
+          <a href="#sec-client" class="nav-chip active" data-sec="1">1. Client Info</a>
+          <a href="#sec-parq" class="nav-chip" data-sec="2">2. PAR-Q</a>
+          <a href="#sec-medical" class="nav-chip" data-sec="3">3. Medical</a>
+          <a href="#sec-lifestyle" class="nav-chip" data-sec="4">4. Lifestyle</a>
+          <a href="#sec-body" class="nav-chip" data-sec="5">5. Physical</a>
+          <a href="#sec-fitness" class="nav-chip" data-sec="6">6. Fitness</a>
+          <a href="#sec-goals" class="nav-chip" data-sec="7">7. Goals</a>
+          <a href="#sec-consent" class="nav-chip" data-sec="8">8. Consent</a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Client Fast-Intake Notice & Requirements Clarity Banner -->
+    <section class="client-guide-section">
+      <div class="client-guide-card" id="clientGuideCard">
+        <div class="guide-header">
+          <div class="guide-pill">
+            <span class="pulse-dot"></span>
+            <span>CLIENT FAST INTAKE &bull; STREAMLINED</span>
+          </div>
+          <div class="guide-status">
+            <span class="status-pill status-pending" id="statusItemName">👤 Name: <em>Required</em></span>
+            <span class="status-pill status-pending" id="statusItemSig">✍️ Signature: <em>Required</em></span>
+            <span class="status-pill status-optional" id="statusItemOpt">📊 Clinical / Assessment: <em>Optional</em></span>
+          </div>
+        </div>
+        <p class="guide-description">
+          <strong>Clients only need to provide their Name and Signature.</strong> Any clinical metrics, blood pressure, circumferences, or coach assessments you don't know can be left completely blank — your coach will measure and complete them in the lab!
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Screening Form -->
+    <main class="form-wrapper">
+      <form id="screeningForm" autocomplete="off" novalidate>
+
+        <!-- SECTION 1: Client Information -->
+        <article class="card-section" id="sec-client">
+          <div class="card-header">
+            <div class="sec-number">01</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Client Information</h2>
+                <span class="sec-badge badge-mand">Required: Name</span>
+              </div>
+              <p class="sec-desc">Basic identification, contact information, and training logistics.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-3">
+              <div class="form-group span-2">
+                <label for="full_name" class="form-label">Full Name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" class="form-control"
+                  placeholder="e.g. Johnathan Miller" required>
+              </div>
+              <div class="form-group">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" id="age" name="age" class="form-control" placeholder="e.g. 29" min="12" max="100">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label class="form-label">Gender</label>
+                <div class="segmented-control">
+                  <label class="segment-opt">
+                    <input type="radio" name="gender" value="Male">
+                    <span class="segment-label">Male</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="gender" value="Female">
+                    <span class="segment-label">Female</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="gender" value="Other">
+                    <span class="segment-label">Other</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 (555) 234-5678">
+              </div>
+              <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="client@example.com">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label for="occupation" class="form-label">Occupation</label>
+                <input type="text" id="occupation" name="occupation" class="form-control"
+                  placeholder="e.g. Software Architect">
+              </div>
+              <div class="form-group">
+                <label for="date_of_assessment" class="form-label">Date of Assessment</label>
+                <input type="text" id="date_of_assessment" name="date_of_assessment" class="form-control"
+                  placeholder="DD/MM/YYYY">
+              </div>
+              <div class="form-group">
+                <label for="preferred_training_time" class="form-label">Preferred Training Time</label>
+                <input type="text" id="preferred_training_time" name="preferred_training_time" class="form-control"
+                  placeholder="e.g. 6:30 AM - 7:30 AM">
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label for="training_experience" class="form-label">Training Experience & History</label>
+              <input type="text" id="training_experience" name="training_experience" class="form-control"
+                placeholder="e.g. 3 years barbell & strength training">
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 2: Health & PAR-Q Screening -->
+        <article class="card-section" id="sec-parq">
+          <div class="card-header">
+            <div class="sec-number">02</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Health & PAR-Q Screening</h2>
+                <span class="sec-badge badge-opt">Optional for Client</span>
+              </div>
+              <p class="sec-desc">Physical Activity Readiness Questionnaire for exercise safety clearance.</p>
+            </div>
+            <div class="status-indicator" id="parqBadge">
+              <span class="indicator-dot"></span>
+              <span id="parqStatusText">All Clear</span>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="parq-list">
+              <!-- Q1 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">1.</span> Has a doctor ever told you that you have a heart condition or that you
+                  should only exercise under medical supervision?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q1" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q1" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q2 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">2.</span> Do you feel pain in your chest during physical activity or at rest?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q2" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q2" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q3 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">3.</span> Have you experienced dizziness, fainting, or unexplained loss of
+                  consciousness?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q3" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q3" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q4 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">4.</span> Do you have any bone, joint, muscle, or movement problem that could be
+                  worsened by exercise?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q4" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q4" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q5 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">5.</span> Are you currently taking any medication that may affect exercise or
+                  heart rate?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q5" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q5" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q6 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">6.</span> Have you had any surgery, serious illness, or significant injury?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q6" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q6" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Q7 -->
+              <div class="parq-item">
+                <div class="parq-text">
+                  <span class="q-num">7.</span> Is there anything else about your health that the trainer should know
+                  before exercise?
+                </div>
+                <div class="parq-switch">
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q7" value="yes">
+                    <span class="switch-pill pill-yes">YES</span>
+                  </label>
+                  <label class="switch-opt">
+                    <input type="radio" name="parq_q7" value="no" checked>
+                    <span class="switch-pill pill-no">NO</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- PAR-Q Details Area -->
+            <div class="details-box mt-4">
+              <label class="form-label">If you answered YES to any question, provide details below:</label>
+              <div class="grid grid-1 gap-2">
+                <input type="text" id="parq_details_1" name="parq_details_1" class="form-control"
+                  placeholder="Line 1: Specific condition, diagnosis date, or medical guidance...">
+                <input type="text" id="parq_details_2" name="parq_details_2" class="form-control"
+                  placeholder="Line 2: Physician clearance, limitations, or rehabilitation history...">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 3: Medical & Injury History -->
+        <article class="card-section" id="sec-medical">
+          <div class="card-header">
+            <div class="sec-number">03</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Medical & Injury History</h2>
+                <span class="sec-badge badge-opt">Optional for Client</span>
+              </div>
+              <p class="sec-desc">Past injuries, surgical history, current treatments, and recurring pain.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-3">
+              <div class="form-group">
+                <label for="current_medical_conditions" class="form-label">Current Medical Conditions</label>
+                <input type="text" id="current_medical_conditions" name="current_medical_conditions"
+                  class="form-control" placeholder="e.g. Asthma, Hypertension, None">
+              </div>
+              <div class="form-group">
+                <label for="previous_injuries" class="form-label">Previous Injuries</label>
+                <input type="text" id="previous_injuries" name="previous_injuries" class="form-control"
+                  placeholder="e.g. Left shoulder impingement (2024)">
+              </div>
+              <div class="form-group">
+                <label for="surgeries" class="form-label">Surgeries</label>
+                <input type="text" id="surgeries" name="surgeries" class="form-control"
+                  placeholder="e.g. ACL reconstruction (2020), None">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label for="current_medications" class="form-label">Current Medications</label>
+                <input type="text" id="current_medications" name="current_medications" class="form-control"
+                  placeholder="e.g. Multivitamin, Omega-3">
+              </div>
+              <div class="form-group">
+                <label for="pain_discomfort" class="form-label">Pain / Discomfort</label>
+                <input type="text" id="pain_discomfort" name="pain_discomfort" class="form-control"
+                  placeholder="e.g. Occasional lower back stiffness">
+              </div>
+              <div class="form-group">
+                <label for="other_health_concerns" class="form-label">Other Health Concerns</label>
+                <input type="text" id="other_health_concerns" name="other_health_concerns" class="form-control"
+                  placeholder="e.g. Family cardiac history, None">
+              </div>
+            </div>
+
+            <div class="details-box mt-4">
+              <label class="form-label">Additional Medical & Injury Details:</label>
+              <div class="grid grid-1 gap-2">
+                <input type="text" id="medical_additional_details_1" name="medical_additional_details_1"
+                  class="form-control" placeholder="Line 1: Treatment received, physical therapy status...">
+                <input type="text" id="medical_additional_details_2" name="medical_additional_details_2"
+                  class="form-control" placeholder="Line 2: Movements to avoid or specific precautions...">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 4: Lifestyle & Activity -->
+        <article class="card-section" id="sec-lifestyle">
+          <div class="card-header">
+            <div class="sec-number">04</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Lifestyle & Activity</h2>
+                <span class="sec-badge badge-opt">Optional for Client</span>
+              </div>
+              <p class="sec-desc">Sleep, hydration, daily habits, stress factors, and nutritional habits.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-3">
+              <div class="form-group">
+                <label for="average_sleep" class="form-label">Average Sleep (hrs / night)</label>
+                <input type="text" id="average_sleep" name="average_sleep" class="form-control" placeholder="e.g. 7.5">
+              </div>
+              <div class="form-group">
+                <label for="daily_water" class="form-label">Daily Water Intake (L)</label>
+                <input type="text" id="daily_water" name="daily_water" class="form-control" placeholder="e.g. 3.0">
+              </div>
+              <div class="form-group">
+                <label for="daily_steps_activity" class="form-label">Daily Steps / Activity Level</label>
+                <input type="text" id="daily_steps_activity" name="daily_steps_activity" class="form-control"
+                  placeholder="e.g. 9,000 steps">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label for="current_exercise" class="form-label">Current Exercise Type</label>
+                <input type="text" id="current_exercise" name="current_exercise" class="form-control"
+                  placeholder="e.g. Resistance training">
+              </div>
+              <div class="form-group">
+                <label for="exercise_frequency" class="form-label">Exercise Frequency (/week)</label>
+                <input type="text" id="exercise_frequency" name="exercise_frequency" class="form-control"
+                  placeholder="e.g. 4 days">
+              </div>
+              <div class="form-group">
+                <label for="typical_work_activity" class="form-label">Typical Work Activity</label>
+                <input type="text" id="typical_work_activity" name="typical_work_activity" class="form-control"
+                  placeholder="e.g. Desk job / Sedentary">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-4">
+              <!-- Smoking -->
+              <div class="form-group">
+                <label class="form-label">Smoking Status</label>
+                <div class="segmented-control">
+                  <label class="segment-opt">
+                    <input type="radio" name="smoking" value="yes">
+                    <span class="segment-label">Yes</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="smoking" value="no" checked>
+                    <span class="segment-label">No</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Alcohol -->
+              <div class="form-group">
+                <label class="form-label">Alcohol Consumption</label>
+                <div class="segmented-control">
+                  <label class="segment-opt">
+                    <input type="radio" name="alcohol" value="yes">
+                    <span class="segment-label">Yes</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="alcohol" value="no" checked>
+                    <span class="segment-label">No</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Stress -->
+              <div class="form-group">
+                <label class="form-label">Stress Level</label>
+                <div class="segmented-control">
+                  <label class="segment-opt">
+                    <input type="radio" name="stress" value="low">
+                    <span class="segment-label">Low</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="stress" value="moderate" checked>
+                    <span class="segment-label">Moderate</span>
+                  </label>
+                  <label class="segment-opt">
+                    <input type="radio" name="stress" value="high">
+                    <span class="segment-label">High</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="details-box mt-4">
+              <label class="form-label">Typical Eating Pattern & Dietary Preferences:</label>
+              <div class="grid grid-1 gap-2">
+                <input type="text" id="dietary_preferences_1" name="dietary_preferences_1" class="form-control"
+                  placeholder="Line 1: High-protein whole foods diet, caloric surplus/deficit...">
+                <input type="text" id="dietary_preferences_2" name="dietary_preferences_2" class="form-control"
+                  placeholder="Line 2: Food allergies, supplements, or macro targets...">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 5: Body & Basic Physical Assessment -->
+        <article class="card-section" id="sec-body">
+          <div class="card-header">
+            <div class="sec-number">05</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Body & Basic Physical Assessment</h2>
+                <span class="sec-badge badge-coach">Optional / Coach Lab Data</span>
+              </div>
+              <p class="sec-desc">Anthropometric measurements and cardiovascular vitals with auto-computed BMI.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Top Metric Row with Live BMI -->
+            <div class="grid grid-4">
+              <div class="form-group">
+                <label for="height" class="form-label">Height (cm)</label>
+                <input type="number" step="0.1" id="height" name="height" class="form-control" placeholder="e.g. 182">
+              </div>
+              <div class="form-group">
+                <label for="weight" class="form-label">Weight (kg)</label>
+                <input type="number" step="0.1" id="weight" name="weight" class="form-control" placeholder="e.g. 84.5">
+              </div>
+              <div class="form-group">
+                <label for="bmi" class="form-label">
+                  BMI
+                  <span class="badge-mini" id="bmiBadge">Auto</span>
+                </label>
+                <input type="text" id="bmi" name="bmi" class="form-control highlight-metric" placeholder="25.5"
+                  readonly>
+              </div>
+              <div class="form-group">
+                <label for="resting_heart_rate" class="form-label">Resting HR (bpm)</label>
+                <input type="number" id="resting_heart_rate" name="resting_heart_rate" class="form-control"
+                  placeholder="e.g. 62">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label class="form-label">Blood Pressure (mmHg)</label>
+                <div class="bp-input-group">
+                  <input type="number" id="bp_systolic" name="bp_systolic" class="form-control"
+                    placeholder="Systolic (120)">
+                  <span class="bp-slash">/</span>
+                  <input type="number" id="bp_diastolic" name="bp_diastolic" class="form-control"
+                    placeholder="Diastolic (80)">
+                </div>
+              </div>
+              <div class="form-group span-2">
+                <label for="body_assessment_date" class="form-label">Assessment Date</label>
+                <input type="text" id="body_assessment_date" name="body_assessment_date" class="form-control"
+                  placeholder="DD/MM/YYYY">
+              </div>
+            </div>
+
+            <!-- Circumferences -->
+            <div class="sub-header mt-4">Circumference Measurements (cm)</div>
+            <div class="grid grid-3 mt-2">
+              <div class="form-group">
+                <label for="waist" class="form-label">Waist (cm)</label>
+                <input type="text" id="waist" name="waist" class="form-control" placeholder="e.g. 86">
+              </div>
+              <div class="form-group">
+                <label for="hip" class="form-label">Hip (cm)</label>
+                <input type="text" id="hip" name="hip" class="form-control" placeholder="e.g. 101">
+              </div>
+              <div class="form-group">
+                <label for="chest" class="form-label">Chest (cm)</label>
+                <input type="text" id="chest" name="chest" class="form-control" placeholder="e.g. 104">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label for="arm" class="form-label">Arm (cm)</label>
+                <input type="text" id="arm" name="arm" class="form-control" placeholder="e.g. 37.5">
+              </div>
+              <div class="form-group">
+                <label for="thigh" class="form-label">Thigh (cm)</label>
+                <input type="text" id="thigh" name="thigh" class="form-control" placeholder="e.g. 59">
+              </div>
+              <div class="form-group">
+                <label for="other_measurement" class="form-label">Other Measurement</label>
+                <input type="text" id="other_measurement" name="other_measurement" class="form-control"
+                  placeholder="e.g. Calf: 38">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 6: Basic Fitness Assessment -->
+        <article class="card-section" id="sec-fitness">
+          <div class="card-header">
+            <div class="sec-number">06</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Basic Fitness Assessment</h2>
+                <span class="sec-badge badge-coach">Optional / Coach Lab Data</span>
+              </div>
+              <p class="sec-desc">Baseline strength, muscular endurance, aerobic conditioning, and mobility tests.</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="fitness-table">
+              <!-- Cardio -->
+              <div class="fitness-row">
+                <div class="form-group">
+                  <label class="form-label">Cardio Test</label>
+                  <input type="text" id="cardio_test" name="cardio_test" class="form-control"
+                    placeholder="e.g. 1.5-mile run">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Result</label>
+                  <input type="text" id="cardio_result" name="cardio_result" class="form-control"
+                    placeholder="e.g. 10 min 45 sec">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date</label>
+                  <input type="text" id="cardio_date" name="cardio_date" class="form-control" placeholder="DD/MM/YYYY">
+                </div>
+              </div>
+
+              <!-- Push-ups -->
+              <div class="fitness-row">
+                <div class="form-group">
+                  <label class="form-label">Push-ups Test</label>
+                  <input type="text" id="pushups_test" name="pushups_test" class="form-control"
+                    placeholder="e.g. Standard floor push-ups">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Result</label>
+                  <input type="text" id="pushups_result" name="pushups_result" class="form-control"
+                    placeholder="e.g. 38 reps">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Notes</label>
+                  <input type="text" id="pushups_notes" name="pushups_notes" class="form-control"
+                    placeholder="e.g. Solid form, good lockout">
+                </div>
+              </div>
+
+              <!-- Squat / Movement Screen -->
+              <div class="fitness-row">
+                <div class="form-group">
+                  <label class="form-label">Squat / Movement Screen</label>
+                  <input type="text" id="squat_test" name="squat_test" class="form-control"
+                    placeholder="e.g. Overhead squat assessment">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Result</label>
+                  <input type="text" id="squat_result" name="squat_result" class="form-control"
+                    placeholder="e.g. Score: 3/3">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Notes</label>
+                  <input type="text" id="squat_notes" name="squat_notes" class="form-control"
+                    placeholder="e.g. Great depth & ankle mobility">
+                </div>
+              </div>
+
+              <!-- Plank -->
+              <div class="fitness-row">
+                <div class="form-group">
+                  <label class="form-label">Plank Test</label>
+                  <input type="text" id="plank_test" name="plank_test" class="form-control"
+                    placeholder="e.g. Prone forearm plank">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Result</label>
+                  <input type="text" id="plank_result" name="plank_result" class="form-control"
+                    placeholder="e.g. 2 min 15 sec">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Notes</label>
+                  <input type="text" id="plank_notes" name="plank_notes" class="form-control"
+                    placeholder="e.g. Strong core stability">
+                </div>
+              </div>
+
+              <!-- Flexibility / Mobility -->
+              <div class="fitness-row">
+                <div class="form-group">
+                  <label class="form-label">Flexibility / Mobility</label>
+                  <input type="text" id="flexibility_test" name="flexibility_test" class="form-control"
+                    placeholder="e.g. Sit and reach / shoulder pass">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Result</label>
+                  <input type="text" id="flexibility_result" name="flexibility_result" class="form-control"
+                    placeholder="e.g. +4 cm / Full pass">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Notes</label>
+                  <input type="text" id="flexibility_notes" name="flexibility_notes" class="form-control"
+                    placeholder="e.g. Good thoracic spine mobility">
+                </div>
+              </div>
+            </div>
+
+            <div class="details-box mt-4">
+              <label class="form-label">Other Observations & Movement Coach Notes:</label>
+              <div class="grid grid-1 gap-2">
+                <input type="text" id="fitness_observations_1" name="fitness_observations_1" class="form-control"
+                  placeholder="Line 1: Excellent base conditioning, eager to progress to heavy barbell cycles...">
+                <input type="text" id="fitness_observations_2" name="fitness_observations_2" class="form-control"
+                  placeholder="Line 2: Asymmetries to address, warm-up protocols...">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 7: Client Goals -->
+        <article class="card-section" id="sec-goals">
+          <div class="card-header">
+            <div class="sec-number">07</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Client Goals</h2>
+                <span class="sec-badge badge-opt">Optional for Client</span>
+              </div>
+              <p class="sec-desc">Target outcomes, timelines, target body composition, and exercise modalities.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-3">
+              <div class="form-group">
+                <label for="primary_goal" class="form-label">Primary Goal</label>
+                <input type="text" id="primary_goal" name="primary_goal" class="form-control"
+                  placeholder="e.g. Hypertrophy & Strength">
+              </div>
+              <div class="form-group">
+                <label for="target_weight" class="form-label">Target Weight (kg)</label>
+                <input type="number" step="0.1" id="target_weight" name="target_weight" class="form-control"
+                  placeholder="e.g. 82">
+              </div>
+              <div class="form-group">
+                <label for="target_date" class="form-label">Target Date</label>
+                <input type="text" id="target_date" name="target_date" class="form-control" placeholder="DD/MM/YYYY">
+              </div>
+            </div>
+
+            <div class="grid grid-3 mt-3">
+              <div class="form-group">
+                <label for="secondary_goal" class="form-label">Secondary Goal</label>
+                <input type="text" id="secondary_goal" name="secondary_goal" class="form-control"
+                  placeholder="e.g. Lower body fat to 12%">
+              </div>
+              <div class="form-group">
+                <label for="training_days_per_week" class="form-label">Training Days / Week</label>
+                <input type="number" id="training_days_per_week" name="training_days_per_week" class="form-control"
+                  placeholder="e.g. 4" min="1" max="7">
+              </div>
+              <div class="form-group">
+                <label for="preferred_activities" class="form-label">Preferred Activities</label>
+                <input type="text" id="preferred_activities" name="preferred_activities" class="form-control"
+                  placeholder="e.g. Barbell lifts, HIIT">
+              </div>
+            </div>
+
+            <div class="details-box mt-4">
+              <label class="form-label">Specific Goals & Performance Expectations:</label>
+              <div class="grid grid-1 gap-2">
+                <input type="text" id="specific_goals_1" name="specific_goals_1" class="form-control"
+                  placeholder="Line 1: Specific PR targets (e.g. 140kg Squat, 100kg Bench, 180kg Deadlift)...">
+                <input type="text" id="specific_goals_2" name="specific_goals_2" class="form-control"
+                  placeholder="Line 2: Cardiovascular stamina, conditioning, athletic power...">
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SECTION 8: Informed Consent & Signatures -->
+        <article class="card-section" id="sec-consent">
+          <div class="card-header">
+            <div class="sec-number">08</div>
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Informed Consent & Authorization</h2>
+                <span class="sec-badge badge-mand">Required: Signature</span>
+              </div>
+              <p class="sec-desc">Legal agreement, health disclosure acknowledgment, and signatures.</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Legal Terms Callout -->
+            <div class="consent-statement">
+              <p>
+                <strong>Informed Consent Declaration:</strong> I understand that physical exercise involves inherent
+                risks, including but not limited to muscle soreness, strains, sprains, falls, cardiovascular events, and
+                other injury or health complications. I have provided accurate health information to the best of my
+                knowledge and agree to inform the trainer if my health status changes. I understand that the trainer
+                will provide exercise guidance within their professional scope, but exercise does not replace medical
+                diagnosis or treatment. I agree to stop exercise and inform the trainer if I experience unusual pain,
+                dizziness, chest discomfort, or other concerning symptoms.
+              </p>
+            </div>
+
+            <!-- Consent Agreement Confirmation Checkbox -->
+            <div class="consent-agreement-box mt-3 mb-3">
+              <label class="consent-checkbox-label">
+                <input type="checkbox" id="consent_agreed" name="consent_agreed" checked>
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">I have read, understood, and agreed to the informed consent declaration above.</span>
+              </label>
+            </div>
+
+            <!-- Signature Mode Tabs -->
+            <div class="sig-mode-selector mt-4">
+              <span class="sig-mode-label">Signature Mode:</span>
+              <button type="button" class="btn-sig-tab active" id="tabDrawSig">✍️ Draw Signature</button>
+              <button type="button" class="btn-sig-tab" id="tabTypeSig">⌨️ Type Name</button>
+            </div>
+
+            <!-- Draw Signature Canvas Box -->
+            <div class="signature-canvas-container" id="drawSigBox">
+              <div class="canvas-header">
+                <span class="canvas-title">Client Signature Canvas</span>
+                <button type="button" id="btnClearSig" class="btn-canvas-action">Clear Drawing</button>
+              </div>
+              <canvas id="sigCanvas" width="600" height="150" class="signature-canvas"></canvas>
+              <p class="canvas-hint">Use mouse or finger/stylus to sign within the gold border above.</p>
+              <input type="hidden" id="client_signature_image" name="client_signature_image">
+            </div>
+
+            <!-- Type Signature Input Box -->
+            <div class="signature-type-container hidden" id="typeSigBox">
+              <div class="grid grid-2">
+                <div class="form-group">
+                  <label for="client_signature" class="form-label">Client Digital Signature (Printed Name)</label>
+                  <input type="text" id="client_signature" name="client_signature" class="form-control font-signature"
+                    placeholder="Johnathan Miller">
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-2 mt-4">
+              <div class="form-group">
+                <label for="client_signature_date" class="form-label">Client Signature Date</label>
+                <input type="text" id="client_signature_date" name="client_signature_date" class="form-control"
+                  placeholder="DD/MM/YYYY">
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- Final Action Bar -->
+        <div class="submit-bar">
+          <div class="submit-info">
+            <span class="info-icon">🛡️</span>
+            <span>All entries will be stamped onto the official Keerthan Strength Lab Assessment PDF.</span>
+          </div>
+          <div class="submit-buttons">
+            <button type="button" id="btnPreviewBottom" class="btn btn-secondary btn-lg">
+              <span>👁️ Live Preview</span>
+            </button>
+            <button type="submit" id="btnDownloadBottom" class="btn btn-gold btn-lg btn-download-trigger">
+              <span class="btn-icon">📥</span>
+              <span>Generate & Download Official PDF</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>&copy; 2026 Keerthan Strength Lab. All rights reserved. Precision Coaching & Assessment Systems.</p>
+        <button type="button" id="btnReplayIntro" class="btn-replay-intro" title="Replay cinematic loading animation">
+          <span>🎬</span> <span>Replay Cinematic Intro</span>
+        </button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- PDF Preview Modal -->
+  <div class="modal-backdrop" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Official PDF Live Preview</h3>
+          <p class="modal-subtitle">Review both pages before downloading the official document.</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnClosePreview" aria-label="Close Preview">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="preview-tabs">
+          <button type="button" class="btn-tab active" data-page="1">Page 1: Client Info & Screening</button>
+          <button type="button" class="btn-tab" data-page="2">Page 2: Physical & Fitness</button>
+        </div>
+        <div class="preview-viewer">
+          <div class="preview-loading" id="previewLoading">
+            <div class="spinner"></div>
+            <span>Rendering high-resolution vector PDF...</span>
+          </div>
+          <div class="preview-stage" id="previewStage">
+            <img id="previewImg1" class="preview-img active" alt="PDF Page 1 Preview">
+            <img id="previewImg2" class="preview-img" alt="PDF Page 2 Preview">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnClosePreviewBottom">Close</button>
+        <button type="button" class="btn btn-gold" id="btnDownloadFromModal">
+          <span class="btn-icon">📥</span>
+          <span>Download PDF Now</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Quick Action Bar for Mobile & Desktop -->
+  <aside class="fab-bar visible" id="fabBar" aria-label="Quick Actions">
+    <button type="button" class="fab-btn fab-pill" id="fabPreview" title="Live Preview PDF">
+      <span>👁️</span>
+      <span class="fab-label">Preview</span>
+    </button>
+    <button type="button" class="fab-btn" id="fabThemeToggle" title="Toggle Light / Dark Theme">
+      <span id="fabThemeIcon">☀️</span>
+    </button>
+    <button type="button" class="fab-btn fab-pill fab-gold btn-download-trigger" id="fabDownload" title="Download Official PDF">
+      <span>📥</span>
+      <span class="fab-label">Download PDF</span>
+    </button>
+  </aside>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+
+</html>
