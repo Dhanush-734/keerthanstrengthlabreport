@@ -1034,7 +1034,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const percentText = document.getElementById('loaderPercent');
   const statusText = document.getElementById('loaderStatusText');
   const skipBtn = document.getElementById('loaderSkipBtn');
-  const replayBtn = document.getElementById('btnReplayIntro');
 
   let loaderAnimFrame = null;
   let loaderFinished = false;
@@ -1119,39 +1118,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loader.addEventListener('click', (e) => {
       // Click anywhere to immediately enter website
       finishLoader();
-    });
-  }
-
-  if (replayBtn) {
-    replayBtn.addEventListener('click', () => {
-      const ring = loader ? loader.querySelector('.loader-precision-ring') : null;
-      const logoFrame = loader ? loader.querySelector('.logo-frame') : null;
-      const sweep = loader ? loader.querySelector('.logo-light-sweep') : null;
-      const brandGroup = loader ? loader.querySelector('.loader-brand-group') : null;
-
-      if (ring) {
-        ring.style.animation = 'none';
-        void ring.offsetWidth;
-        ring.style.animation = '';
-      }
-      if (logoFrame) {
-        logoFrame.style.animation = 'none';
-        void logoFrame.offsetWidth;
-        logoFrame.style.animation = '';
-      }
-      if (sweep) {
-        sweep.style.animation = 'none';
-        void sweep.offsetWidth;
-        sweep.style.animation = '';
-      }
-      if (brandGroup) {
-        brandGroup.style.animation = 'none';
-        void brandGroup.offsetWidth;
-        brandGroup.style.animation = '';
-      }
-
-      runCinematicLoader();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 

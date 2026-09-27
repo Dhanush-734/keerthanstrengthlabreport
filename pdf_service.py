@@ -1,20 +1,31 @@
+import os
 import io
 import base64
 import pymupdf
 from PIL import Image, ImageDraw
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def create_rounded_logo():
+    soft_logo = os.path.join(BASE_DIR, 'logo_rounded_soft.png')
+    if os.path.exists(soft_logo):
+        return soft_logo
     try:
-        im = Image.open('logo.jpg').convert('RGBA')
+        raw_logo = os.path.join(BASE_DIR, 'logo.jpg')
+        if not os.path.exists(raw_logo):
+            return None
+        im = Image.open(raw_logo).convert('RGBA')
         w, h = im.size
         radius = int(w * 0.12)
         mask = Image.new('L', (w, h), 0)
         draw = ImageDraw.Draw(mask)
         draw.rounded_rectangle((0, 0, w, h), radius=radius, fill=255)
         im.putalpha(mask)
-        im.save('logo_rounded_soft.png')
+        im.save(soft_logo)
+        return soft_logo
     except Exception as e:
         print(f"Logo processing error: {e}")
+        return None
 
 def add_text_field(page, name, rect, label="", fontsize=8.5, multiline=False, value=""):
     w = pymupdf.Widget()
@@ -52,8 +63,9 @@ def generate_screening_pdf(data=None, output_path=None):
     if data is None:
         data = {}
     
-    create_rounded_logo()
-    doc = pymupdf.open('Keerthan_Strength_Lab_Client_Screening_Form.pdf')
+    logo_path = create_rounded_logo() or os.path.join(BASE_DIR, 'logo_rounded_soft.png')
+    template_path = os.path.join(BASE_DIR, 'Keerthan_Strength_Lab_Client_Screening_Form.pdf')
+    doc = pymupdf.open(template_path)
 
     # =========================================================================
     # 1. PAGE 1 SETUP
@@ -63,7 +75,8 @@ def generate_screening_pdf(data=None, output_path=None):
     # Logo Top-Right on Page 1
     logo_rect = pymupdf.Rect(546.78 - 60, 32, 546.78, 32 + 60)
     try:
-        p1.insert_image(logo_rect, filename='logo_rounded_soft.png')
+        if os.path.exists(logo_path):
+            p1.insert_image(logo_rect, filename=logo_path)
     except Exception:
         pass
 

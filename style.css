@@ -1337,8 +1337,69 @@ body {
 .app-footer {
   text-align: center;
   padding-top: 36px;
+  padding-bottom: 30px;
   font-size: 0.78rem;
   color: var(--text-muted);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.developer-credit {
+  font-size: 0.70rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.4px;
+}
+
+.dev-link {
+  color: var(--gold-400);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(230, 186, 85, 0.07);
+  border: 1px solid rgba(230, 186, 85, 0.2);
+  transition: all 0.2s ease;
+}
+
+.dev-link:hover {
+  color: #FFFFFF;
+  background: rgba(230, 186, 85, 0.18);
+  border-color: var(--border-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(230, 186, 85, 0.25);
+}
+
+.dev-insta-icon {
+  display: inline-block;
+  vertical-align: middle;
+  stroke: currentColor;
+}
+
+[data-theme="light"] .developer-credit {
+  color: #64748B;
+}
+
+[data-theme="light"] .dev-link {
+  color: #7A500F;
+  background: rgba(184, 133, 35, 0.08);
+  border-color: rgba(184, 133, 35, 0.25);
+}
+
+[data-theme="light"] .dev-link:hover {
+  color: #4A3109;
+  background: rgba(184, 133, 35, 0.15);
+  border-color: rgba(184, 133, 35, 0.5);
 }
 
 /* ---------------- MODAL ---------------- */
@@ -2556,30 +2617,6 @@ body {
   opacity: 1;
 }
 
-/* Replay Button in Main App Footer */
-.btn-replay-intro {
-  margin-top: 12px;
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-family: var(--font-sans);
-  font-size: 0.74rem;
-  font-weight: 600;
-  padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-}
-
-.btn-replay-intro:hover {
-  background: rgba(230, 186, 85, 0.1);
-  border-color: var(--border-gold);
-  color: var(--gold-300);
-  transform: translateY(-1px);
-}
 
 /* Mobile Responsiveness for Loading Screen */
 @media (max-width: 640px) {
