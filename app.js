@@ -62,16 +62,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4-Page Preview Modal Elements
   const previewModal = document.getElementById('previewModal');
+  const previewScrollArea = document.getElementById('previewScrollArea');
   const btnClosePreview = document.getElementById('btnClosePreview');
   const btnClosePreviewBottom = document.getElementById('btnClosePreviewBottom');
   const btnDownloadFromModal = document.getElementById('btnDownloadFromModal');
   const previewLoading = document.getElementById('previewLoading');
+  const previewLoadingText = document.getElementById('previewLoadingText');
+  const previewErrorBox = document.getElementById('previewErrorBox');
+  const btnRetryPreview = document.getElementById('btnRetryPreview');
   const previewStage = document.getElementById('previewStage');
   const previewImg1 = document.getElementById('previewImg1');
   const previewImg2 = document.getElementById('previewImg2');
   const previewImg3 = document.getElementById('previewImg3');
   const previewImg4 = document.getElementById('previewImg4');
   const previewTabs = document.querySelectorAll('.preview-tabs .btn-tab');
+
+  // Preview Cache
+  let cachedPreviewPages = null;
+  let cachedPreviewKey = null;
+  let activePreviewPage = 1;
 
   // Signature Elements
   const sigCanvas = document.getElementById('sigCanvas');
@@ -536,51 +545,111 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----------------------------------------------------
   // 12. LIVE PREVIEW MODAL
   // ----------------------------------------------------
+  function switchPreviewPage(pageNum) {
+    activePreviewPage = parseInt(pageNum, 10);
+    previewTabs.forEach(t => {
+      const isTarget = t.getAttribute('data-page') === String(activePreviewPage);
+      t.classList.toggle('active', isTarget);
+      t.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+
+    const allImgs = [previewImg1, previewImg2, previewImg3, previewImg4];
+    allImgs.forEach((img, idx) => {
+      if (img) {
+        if (idx + 1 === activePreviewPage) {
+          img.classList.add('active');
+        } else {
+          img.classList.remove('active');
+        }
+      }
+    });
+
+    // Requirement 3: Reset scroll position to top of page immediately on tab switch
+    if (previewScrollArea) {
+      previewScrollArea.scrollTop = 0;
+    }
+  }
+
+  function applyPreviewPages(pages) {
+    if (previewImg1 && pages[0]) previewImg1.src = pages[0];
+    if (previewImg2 && pages[1]) previewImg2.src = pages[1];
+    if (previewImg3 && pages[2]) previewImg3.src = pages[2];
+    if (previewImg4 && pages[3]) previewImg4.src = pages[3];
+  }
+
   async function openLivePreview() {
     if (!previewModal) return;
+
+    // Requirement 2 & 5: Lock background page scroll completely
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
     previewModal.classList.add('show');
     previewModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
 
-    if (previewLoading) previewLoading.style.display = 'flex';
-    if (previewStage) previewStage.style.opacity = '0.3';
+    if (previewScrollArea) {
+      previewScrollArea.scrollTop = 0;
+    }
+
+    const data = getFormDataObject();
+    const currentKey = JSON.stringify(data);
+
+    // Requirement 9: Instant cached loading if form data has not changed
+    if (cachedPreviewKey === currentKey && cachedPreviewPages && cachedPreviewPages.length >= 4) {
+      applyPreviewPages(cachedPreviewPages);
+      switchPreviewPage(activePreviewPage || 1);
+      if (previewLoading) previewLoading.style.display = 'none';
+      if (previewStage) previewStage.style.opacity = '1';
+      if (previewErrorBox) previewErrorBox.classList.add('hidden');
+      return;
+    }
+
+    // Requirement 7: Show professional loading indicator only while rendering
+    if (previewLoading) {
+      if (previewLoadingText) previewLoadingText.textContent = 'Loading page...';
+      previewLoading.style.display = 'flex';
+    }
+    if (previewErrorBox) previewErrorBox.classList.add('hidden');
+    if (previewStage) previewStage.style.opacity = '0.2';
 
     try {
-      const data = getFormDataObject();
-
       let pages = null;
       try {
         const res = await fetch('/api/preview-pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: currentKey
         });
         if (res.ok) {
           const json = await res.json();
           pages = json.pages;
+        } else {
+          throw new Error(`Server returned HTTP ${res.status}`);
         }
       } catch (srvErr) {
-        console.warn('Server preview endpoint unavailable, attempting fallback:', srvErr);
+        console.warn('Server preview error:', srvErr);
+        throw srvErr;
       }
 
       if (pages && pages.length >= 4) {
-        if (previewImg1) previewImg1.src = pages[0];
-        if (previewImg2) previewImg2.src = pages[1];
-        if (previewImg3) previewImg3.src = pages[2];
-        if (previewImg4) previewImg4.src = pages[3];
-      } else {
-        if (previewImg1) previewImg1.src = 'verify_filled_page1.png';
-        if (previewImg2) previewImg2.src = 'verify_filled_page2.png';
-        if (previewImg3) previewImg3.src = 'verify_filled_page3.png';
-        if (previewImg4) previewImg4.src = 'verify_filled_page4.png';
-      }
+        cachedPreviewPages = pages;
+        cachedPreviewKey = currentKey;
+        applyPreviewPages(pages);
+        switchPreviewPage(1);
 
-      if (previewLoading) previewLoading.style.display = 'none';
-      if (previewStage) previewStage.style.opacity = '1';
+        if (previewLoading) previewLoading.style.display = 'none';
+        if (previewStage) previewStage.style.opacity = '1';
+        if (previewErrorBox) previewErrorBox.classList.add('hidden');
+      } else {
+        throw new Error('Incomplete pages received');
+      }
     } catch (err) {
       console.error('Preview error:', err);
       if (previewLoading) previewLoading.style.display = 'none';
-      showToast('Could not generate preview: ' + err.message, 'error');
+      if (previewStage) previewStage.style.opacity = '0.1';
+      // Requirement 8: Clean error handling without freezing modal
+      if (previewErrorBox) previewErrorBox.classList.remove('hidden');
+      showToast('Unable to preview this page. Please try downloading the PDF.', 'error');
     }
   }
 
@@ -588,32 +657,43 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!previewModal) return;
     previewModal.classList.remove('show');
     previewModal.setAttribute('aria-hidden', 'true');
+
+    // Requirement 2 & 5: Restore background page scrolling cleanly
     document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }
 
+  // Hook up preview triggers & closes
   if (btnOpenPreview) btnOpenPreview.addEventListener('click', openLivePreview);
   if (btnPreviewBottom) btnPreviewBottom.addEventListener('click', openLivePreview);
   if (fabPreview) fabPreview.addEventListener('click', openLivePreview);
 
   if (btnClosePreview) btnClosePreview.addEventListener('click', closeLivePreview);
   if (btnClosePreviewBottom) btnClosePreviewBottom.addEventListener('click', closeLivePreview);
+  if (btnRetryPreview) btnRetryPreview.addEventListener('click', openLivePreview);
 
+  // Close when clicking modal backdrop outside dialog
+  if (previewModal) {
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) {
+        closeLivePreview();
+      }
+    });
+  }
+
+  // Close on Escape key press
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewModal && previewModal.classList.contains('show')) {
+      closeLivePreview();
+    }
+  });
+
+  // Tab click listeners
   previewTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      previewTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
       const pageNum = tab.getAttribute('data-page');
-
-      const allImgs = [previewImg1, previewImg2, previewImg3, previewImg4];
-      allImgs.forEach((img, idx) => {
-        if (img) {
-          if (idx + 1 === parseInt(pageNum, 10)) {
-            img.classList.add('active');
-          } else {
-            img.classList.remove('active');
-          }
-        }
-      });
+      if (pageNum) switchPreviewPage(pageNum);
     });
   });
 

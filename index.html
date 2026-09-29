@@ -980,7 +980,8 @@
 
   <!-- 4-Page PDF Preview Modal -->
   <div class="modal-backdrop" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-xl">
+    <div class="modal-dialog modal-dialog-preview">
+      <!-- Fixed Header -->
       <div class="modal-header">
         <div class="modal-title-group">
           <h3 class="modal-title">Official PDF Dossier Preview</h3>
@@ -989,27 +990,38 @@
         <button type="button" class="btn-close-modal" id="btnClosePreview" aria-label="Close Preview">&times;</button>
       </div>
 
-      <div class="modal-body">
-        <div class="preview-tabs">
-          <button type="button" class="btn-tab active" data-page="1">Page 1: Client Screening</button>
-          <button type="button" class="btn-tab" data-page="2">Page 2: PAR-Q (10 Qs)</button>
-          <button type="button" class="btn-tab" data-page="3">Page 3: Initial Assessment</button>
-          <button type="button" class="btn-tab" data-page="4">Page 4: Barriers & Notes</button>
-        </div>
-        <div class="preview-viewer">
-          <div class="preview-loading" id="previewLoading">
-            <div class="spinner"></div>
-            <span>Rendering high-resolution vector PDF pages...</span>
-          </div>
-          <div class="preview-stage" id="previewStage">
-            <img id="previewImg1" class="preview-img active" alt="PDF Page 1 Preview">
-            <img id="previewImg2" class="preview-img" alt="PDF Page 2 Preview">
-            <img id="previewImg3" class="preview-img" alt="PDF Page 3 Preview">
-            <img id="previewImg4" class="preview-img" alt="PDF Page 4 Preview">
-          </div>
+      <!-- Fixed Page Tabs -->
+      <div class="preview-tabs-bar">
+        <div class="preview-tabs" role="tablist">
+          <button type="button" class="btn-tab active" data-page="1" role="tab" aria-selected="true">Page 1: Client Screening</button>
+          <button type="button" class="btn-tab" data-page="2" role="tab" aria-selected="false">Page 2: PAR-Q (10 Qs)</button>
+          <button type="button" class="btn-tab" data-page="3" role="tab" aria-selected="false">Page 3: Initial Assessment</button>
+          <button type="button" class="btn-tab" data-page="4" role="tab" aria-selected="false">Page 4: Barriers & Notes</button>
         </div>
       </div>
 
+      <!-- SCROLLABLE PDF PREVIEW AREA (The ONLY vertically scrollable container) -->
+      <div class="preview-scroll-area" id="previewScrollArea">
+        <div class="preview-loading" id="previewLoading">
+          <div class="spinner"></div>
+          <span id="previewLoadingText">Loading page...</span>
+        </div>
+
+        <div class="preview-error-box hidden" id="previewErrorBox">
+          <div class="error-icon">⚠️</div>
+          <p class="error-msg">Unable to preview this page. Please try downloading the PDF.</p>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnRetryPreview">Retry Preview</button>
+        </div>
+
+        <div class="preview-stage" id="previewStage">
+          <img id="previewImg1" class="preview-img active" alt="PDF Page 1: Client Screening Preview">
+          <img id="previewImg2" class="preview-img" alt="PDF Page 2: PAR-Q (10 Qs) Preview">
+          <img id="previewImg3" class="preview-img" alt="PDF Page 3: Initial Assessment Preview">
+          <img id="previewImg4" class="preview-img" alt="PDF Page 4: Barriers & Notes Preview">
+        </div>
+      </div>
+
+      <!-- Fixed Footer -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btnClosePreviewBottom">Close</button>
         <button type="button" class="btn btn-gold" id="btnDownloadFromModal">
