@@ -25,12 +25,14 @@ wheels/
 *.egg
 
 # Test outputs and temporary preview renders
-test_*.png
-crop_*.png
-verify_*.png
-preview_page1_test.png
-page_1.png
-page_2.png
+/test_*.png
+/crop_*.png
+/verify_*.png
+/preview_page1_test.png
+/page_1.png
+/page_2.png
+!assets/
+!assets/**
 *.webp
 Keerthan_Strength_Lab_Client_Screening_Form_TEST_FILLED.pdf
 
