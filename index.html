@@ -703,7 +703,7 @@
             <!-- Read-only Notice for Clients -->
             <div class="assessment-readonly-banner" id="assessReadonlyNotice">
               <div class="readonly-badge-tag">Trainer Assessment — Read Only</div>
-              <p class="readonly-desc">The physical measurements and fitness assessment records below are provided by your trainer in the lab.</p>
+              <p class="readonly-desc">This section is for trainer use only and will be filled in by your instructor on the physical hard copy during your lab assessment.</p>
             </div>
 
             <!-- Administration details -->
@@ -718,12 +718,12 @@
                 <div class="form-group">
                   <label for="instructor_name" class="form-label">Instructor's Name</label>
                   <input type="text" id="instructor_name" name="instructor_name" class="form-control"
-                    placeholder="Keerthan" value="Keerthan" readonly tabindex="-1">
+                    placeholder="Trainer to complete on hard copy" value="" readonly tabindex="-1">
                 </div>
                 <div class="form-group">
                   <label for="assessment_date" class="form-label">Date</label>
                   <input type="text" id="assessment_date" name="assessment_date" class="form-control"
-                    placeholder="DD/MM/YYYY" readonly tabindex="-1">
+                    placeholder="DD/MM/YYYY (Trainer fills on session)" readonly tabindex="-1">
                 </div>
               </div>
             </div>
@@ -732,16 +732,16 @@
             <div class="test-selection-instruction mb-4">
               <div class="instruction-left">
                 <strong>Physical Measurements and Fitness Assessments Record</strong>
-                <p id="testInstructionText">Clinical fitness assessment protocols evaluated and recorded in the lab.</p>
+                <p id="testInstructionText">Trainer records measurements and clinical fitness evaluations directly on the printed hard copy.</p>
               </div>
               <div class="instruction-badge" id="testSelectionBadge">
-                <span class="badge-count" id="badgeCountDisplay">8 Recorded</span>
-                <span class="badge-status-txt" id="badgeStatusDisplay">Lab Battery</span>
+                <span class="badge-count" id="badgeCountDisplay">In-Person Record</span>
+                <span class="badge-status-txt" id="badgeStatusDisplay">Trainer Hard Copy</span>
               </div>
             </div>
 
             <!-- Hidden field for chosen tests -->
-            <input type="hidden" id="chosen_tests" name="chosen_tests" value="digital,bmi,waist circumference,bio-electrical impedance,press up,rockport walking test,hamstrings,shoulders">
+            <input type="hidden" id="chosen_tests" name="chosen_tests" value="">
 
             <!-- 7 Assessment Domain Cards (Display Only) -->
             <div class="assessment-cards-grid">
@@ -754,19 +754,19 @@
                   </div>
                   <div class="test-chips-selector">
                     <button type="button" class="test-chip" data-test="manual" tabindex="-1">manual</button>
-                    <button type="button" class="test-chip active" data-test="digital" tabindex="-1">digital</button>
+                    <button type="button" class="test-chip" data-test="digital" tabindex="-1">digital</button>
                   </div>
                 </div>
                 <div class="grid grid-2 mt-2">
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="bp_results" name="bp_results" class="form-control"
-                      value="116/74 mmHg (Resting HR: 62 bpm)" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="bp_reasons" name="bp_reasons" class="form-control"
-                      value="Routine baseline assessment before high-intensity resistance." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -778,8 +778,8 @@
                     <h4>Anthropometrics</h4>
                   </div>
                   <div class="test-chips-selector">
-                    <button type="button" class="test-chip active" data-test="bmi" tabindex="-1">BMI</button>
-                    <button type="button" class="test-chip active" data-test="waist circumference" tabindex="-1">waist circumference</button>
+                    <button type="button" class="test-chip" data-test="bmi" tabindex="-1">BMI</button>
+                    <button type="button" class="test-chip" data-test="waist circumference" tabindex="-1">waist circumference</button>
                     <button type="button" class="test-chip" data-test="waist to hip ratio" tabindex="-1">waist to hip ratio</button>
                   </div>
                 </div>
@@ -787,12 +787,12 @@
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="anthro_results" name="anthro_results" class="form-control"
-                      value="BMI: 22.7 (Normal weight) | Waist: 70 cm | WHR: 0.74" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="anthro_reasons" name="anthro_reasons" class="form-control"
-                      value="Standard body composition metrics to gauge progress over 12 weeks." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -805,19 +805,19 @@
                   </div>
                   <div class="test-chips-selector">
                     <button type="button" class="test-chip" data-test="skinfolds callipers" tabindex="-1">skinfolds callipers</button>
-                    <button type="button" class="test-chip active" data-test="bio-electrical impedance" tabindex="-1">bio-electrical impedance</button>
+                    <button type="button" class="test-chip" data-test="bio-electrical impedance" tabindex="-1">bio-electrical impedance</button>
                   </div>
                 </div>
                 <div class="grid grid-2 mt-2">
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="body_comp_results" name="body_comp_results" class="form-control"
-                      value="Body Fat: 21.4% (via bio-electrical impedance scan)" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="body_comp_reasons" name="body_comp_reasons" class="form-control"
-                      value="Selected bio-electrical impedance for non-invasive speed and comfort." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -830,7 +830,7 @@
                   </div>
                   <div class="test-chips-selector">
                     <button type="button" class="test-chip" data-test="sit-up" tabindex="-1">sit-up</button>
-                    <button type="button" class="test-chip active" data-test="press up" tabindex="-1">press up</button>
+                    <button type="button" class="test-chip" data-test="press up" tabindex="-1">press up</button>
                     <button type="button" class="test-chip" data-test="back extension" tabindex="-1">back extension</button>
                     <button type="button" class="test-chip" data-test="repetition maximum tests" tabindex="-1">1RM / Rep Max (bench, squat, deadlift)</button>
                   </div>
@@ -839,12 +839,12 @@
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="muscular_results" name="muscular_results" class="form-control"
-                      value="Push-ups: 22 reps | Plank: 1 min 45 sec | Goblet Squat: 20kg x 12 reps" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="muscular_reasons" name="muscular_reasons" class="form-control"
-                      value="Baseline muscular endurance and core stability screen." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -858,7 +858,7 @@
                   <div class="test-chips-selector">
                     <button type="button" class="test-chip" data-test="balke treadmill" tabindex="-1">Balke treadmill</button>
                     <button type="button" class="test-chip" data-test="astrand bike test" tabindex="-1">Astrand Bike</button>
-                    <button type="button" class="test-chip active" data-test="rockport walking test" tabindex="-1">Rockport walking</button>
+                    <button type="button" class="test-chip" data-test="rockport walking test" tabindex="-1">Rockport walking</button>
                     <button type="button" class="test-chip" data-test="submaximal predictive test" tabindex="-1">submaximal predictive</button>
                     <button type="button" class="test-chip" data-test="multistage fitness test" tabindex="-1">multistage test</button>
                     <button type="button" class="test-chip" data-test="cooper 1.5-mile run" tabindex="-1">Cooper 1.5-mile</button>
@@ -870,12 +870,12 @@
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="cardio_results" name="cardio_results" class="form-control"
-                      value="Rockport Walking Test: Estimated VO2max 41.2 ml/kg/min (Good)" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="cardio_reasons" name="cardio_reasons" class="form-control"
-                      value="Low impact walking test chosen due to previous ankle history." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -888,23 +888,23 @@
                   </div>
                   <div class="test-chips-selector">
                     <button type="button" class="test-chip" data-test="soleus and gastrocnemius" tabindex="-1">soleus & calf</button>
-                    <button type="button" class="test-chip active" data-test="hamstrings" tabindex="-1">hamstrings</button>
+                    <button type="button" class="test-chip" data-test="hamstrings" tabindex="-1">hamstrings</button>
                     <button type="button" class="test-chip" data-test="quadriceps and hip flexors" tabindex="-1">quads & hip flexors</button>
                     <button type="button" class="test-chip" data-test="pectoralis major" tabindex="-1">pec major</button>
                     <button type="button" class="test-chip" data-test="latissimus dorsi" tabindex="-1">lats</button>
-                    <button type="button" class="test-chip active" data-test="shoulders" tabindex="-1">shoulders</button>
+                    <button type="button" class="test-chip" data-test="shoulders" tabindex="-1">shoulders</button>
                   </div>
                 </div>
                 <div class="grid grid-2 mt-2">
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="rom_results" name="rom_results" class="form-control"
-                      value="Hamstrings: Normal (85 deg) | Shoulder Flexion: Full ROM (180 deg) | Ankle Dorsiflexion: Symmetrical 35 deg" readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="rom_reasons" name="rom_reasons" class="form-control"
-                      value="Screening mobility for safe squat and deadlift mechanics." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>
@@ -927,12 +927,12 @@
                   <div class="form-group">
                     <label class="form-label-sm">Results / Observations</label>
                     <input type="text" id="posture_results" name="posture_results" class="form-control"
-                      value="Slight anterior pelvic tilt and forward head posture from computer work. Knees tracking neutral." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                   <div class="form-group">
                     <label class="form-label-sm">Reason for choice / Justification</label>
                     <input type="text" id="posture_reasons" name="posture_reasons" class="form-control"
-                      value="Crucial for tailoring corrective warm-up and posterior chain volume." readonly tabindex="-1">
+                      value="" placeholder="Trainer will record on hard copy" readonly tabindex="-1">
                   </div>
                 </div>
               </div>

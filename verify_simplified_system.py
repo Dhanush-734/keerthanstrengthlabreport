@@ -111,10 +111,11 @@ def verify():
     assert res_sample.status_code == 200
     sample_data = res_sample.json()
     assert "client_notes" in sample_data
-    assert "bp_results" in sample_data
-    assert "muscular_results" in sample_data
+    # Initial Assessment fields must NOT be filled (trainer fills on hard copy)
+    assert "bp_results" not in sample_data, "Initial assessment should not be in sample data"
+    assert "muscular_results" not in sample_data, "Initial assessment should not be in sample data"
 
-    # Generate PDF
+    # Generate PDF (with clean empty assessment rows for hard-copy writing)
     res_pdf = requests.post(f"{BASE_URL}/api/generate-pdf", json=sample_data)
     assert res_pdf.status_code == 200
     assert res_pdf.headers.get("content-type") == "application/pdf"

@@ -457,8 +457,8 @@ def render_page_3(doc, data, is_fillable=False):
     w_val = content_w - w_lbl
     admin_rows = [
         ("Client's Name", data.get('assessment_client_name') or data.get('client_name') or data.get('full_name', ''), "assessment_client_name"),
-        ("Instructor's Name", data.get('instructor_name') or data.get('learner_name', ''), "instructor_name"),
-        ("Date", data.get('assessment_date') or data.get('screening_date', ''), "assessment_date")
+        ("Instructor's Name", data.get('instructor_name', ''), "instructor_name"),
+        ("Date", data.get('assessment_date', ''), "assessment_date")
     ]
     for lbl, val, fn in admin_rows:
         draw_cell(p, left_m, y, w_lbl, 16.0, bg_color=C_TH_BG)

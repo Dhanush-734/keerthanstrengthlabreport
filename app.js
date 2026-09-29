@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Today's Date
   const today = new Date();
   const formattedToday = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-  [screeningDateInput, parqDateInput, assessDateInput, clientSigDateInput].forEach(el => {
+  [screeningDateInput, parqDateInput, clientSigDateInput].forEach(el => {
     if (el && !el.value) el.value = formattedToday;
   });
 
@@ -143,6 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const chips = secAssessment.querySelectorAll('.test-chip');
     chips.forEach(chip => {
       chip.tabIndex = -1;
+      chip.classList.remove('active');
+      chip.style.pointerEvents = 'none';
+      chip.style.cursor = 'default';
       chip.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -379,23 +382,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const todayStr = screeningDateInput ? screeningDateInput.value.trim() : formattedToday;
     data.screening_date = todayStr;
     data.parq_date = todayStr;
-    data.assessment_date = todayStr;
+    data.assessment_date = assessDateInput ? assessDateInput.value.trim() : '';
     data.client_signature_date = (clientSigDateInput ? clientSigDateInput.value.trim() : todayStr) || todayStr;
     data.parq_signature_date = data.client_signature_date;
 
     // Client Notes
     data.client_notes = clientNotesInput ? clientNotesInput.value.trim() : '';
 
-    // Chosen Tests (from active chips in assessment section)
-    const activeChips = document.querySelectorAll('.test-chip.active');
-    const selected = [];
-    activeChips.forEach(chip => {
-      const t = chip.getAttribute('data-test');
-      if (t) selected.push(t);
-    });
-    data.chosen_tests = selected;
+    // Chosen Tests (trainer will circle on physical hard copy)
+    data.chosen_tests = [];
 
-    // Assessment record values (read-only defaults)
+    // Assessment record values (read-only; trainer completes on physical hard copy)
     const assessFields = [
       'instructor_name', 'bp_results', 'bp_reasons',
       'anthro_results', 'anthro_reasons',
@@ -407,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     assessFields.forEach(f => {
       const el = document.getElementById(f);
-      if (el) data[f] = el.value.trim();
+      data[f] = el ? el.value.trim() : '';
     });
 
     // Signature data
@@ -437,22 +434,17 @@ document.addEventListener('DOMContentLoaded', () => {
         continue;
       }
 
-      if (key === 'chosen_tests' && Array.isArray(value)) {
-        const allChips = document.querySelectorAll('.test-chip');
-        allChips.forEach(c => {
-          const t = c.getAttribute('data-test');
-          if (value.includes(t)) {
-            c.classList.add('active');
-          } else {
-            c.classList.remove('active');
-          }
-        });
-        if (chosenTestsInput) chosenTestsInput.value = value.join(',');
+      if (key === 'chosen_tests') {
+        // Skip chosen tests - trainer will circle tests on physical hard copy
         continue;
       }
 
       const input = document.getElementById(key);
       if (input && value !== null && value !== undefined) {
+        // Skip read-only initial assessment fields - trainer will fill on hard copy
+        if (secAssessment && secAssessment.contains(input) && input !== assessClientNameInput) {
+          continue;
+        }
         input.value = value;
       }
     }

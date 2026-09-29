@@ -65,27 +65,7 @@ def get_sample_data():
         'attitude_motivation_summary': 'Highly driven and goal-oriented. Motivated by physical strength gains, better posture, and energy levels for demanding tech career.',
 
         # Client Notes / Additional Information
-        'client_notes': 'Primary goal is preparing for an autumn half-marathon while improving thoracic mobility and lower back stability. Prefer 7 AM sessions.',
-
-        # Initial Assessment (Trainer-Only Record)
-        'assessment_client_name': 'Alex Morgan',
-        'instructor_name': 'Keerthan',
-        'assessment_date': '29/09/2026',
-        'chosen_tests': ['digital', 'bmi', 'waist circumference', 'bio-electrical impedance', 'press up', 'rockport walking test', 'hamstrings', 'shoulders'],
-        'bp_results': '116/74 mmHg (Resting HR: 62 bpm)',
-        'bp_reasons': 'Routine baseline assessment before high-intensity resistance.',
-        'anthro_results': 'BMI: 22.7 (Normal weight) | Waist: 70 cm | WHR: 0.74',
-        'anthro_reasons': 'Standard body composition metrics to gauge progress over 12 weeks.',
-        'body_comp_results': 'Body Fat: 21.4% (via bio-electrical impedance scan)',
-        'body_comp_reasons': 'Selected bio-electrical impedance for non-invasive speed and comfort.',
-        'muscular_results': 'Push-ups: 22 reps | Plank: 1 min 45 sec | Goblet Squat: 20kg x 12 reps',
-        'muscular_reasons': 'Baseline muscular endurance and core stability screen.',
-        'cardio_results': 'Rockport Walking Test: Estimated VO2max 41.2 ml/kg/min (Good)',
-        'cardio_reasons': 'Low impact walking test chosen due to previous ankle history.',
-        'rom_results': 'Hamstrings: Normal (85 deg) | Shoulder Flexion: Full ROM (180 deg) | Ankle Dorsiflexion: Symmetrical 35 deg',
-        'rom_reasons': 'Screening mobility for safe squat and deadlift mechanics.',
-        'posture_results': 'Slight anterior pelvic tilt and forward head posture from computer work. Knees tracking neutral.',
-        'posture_reasons': 'Crucial for tailoring corrective warm-up and posterior chain volume.'
+        'client_notes': 'Primary goal is preparing for an autumn half-marathon while improving thoracic mobility and lower back stability. Prefer 7 AM sessions.'
     }
     return jsonify(sample)
 
