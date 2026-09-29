@@ -109,21 +109,6 @@
 
         <!-- Quick Action Bar -->
         <div class="header-actions">
-          <!-- Role Indicator / Trainer Portal -->
-          <div class="role-badge-wrapper" id="roleBadgeWrapper">
-            <button type="button" id="btnTrainerPortal" class="btn btn-secondary btn-trainer-toggle" title="Trainer Mode & Clinical Assessment">
-              <span class="btn-icon">🔑</span>
-              <span id="trainerPortalBtnText">Trainer Portal</span>
-            </button>
-            <button type="button" id="btnClientRoster" class="btn btn-secondary hidden" title="View Registered Clients">
-              <span class="btn-icon">👥</span>
-              <span>Roster (<span id="rosterCount">0</span>)</span>
-            </button>
-            <button type="button" id="btnLogoutTrainer" class="btn btn-ghost hidden" title="Exit Trainer Mode">
-              <span>Exit Trainer Mode</span>
-            </button>
-          </div>
-
           <button type="button" id="themeToggle" class="btn-theme-toggle" aria-label="Toggle Light and Dark Mode" title="Toggle Light / Dark Mode">
             <span class="theme-toggle-track">
               <span class="theme-toggle-icon">🌙</span>
@@ -162,17 +147,16 @@
         <div class="progress-track">
           <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
         </div>
-
-        <div class="fast-intake-banner">
-          <div class="status-items">
-            <span class="status-pill status-mand" id="statusItemClient">
-              👤 Client: <em>Required</em>
+        <div class="progress-badges">
+          <div class="badge-group">
+            <span class="status-pill status-pending" id="statusItemClient">
+              📋 Client Profile: <em>Incomplete</em>
             </span>
-            <span class="status-pill status-mand" id="statusItemParq">
-              🛡️ PAR-Q: <em>10 Questions</em>
+            <span class="status-pill status-pending" id="statusItemParq">
+              🩺 PAR-Q Clearance: <em>Pending</em>
             </span>
-            <span class="status-pill status-optional" id="statusItemTests">
-              🎯 Initial Assessment: <em id="chosenTestsCount">Trainer In-Lab</em>
+            <span class="status-pill status-ready" id="statusItemAssessment">
+              🔒 Initial Assessment: <em>Trainer Record Ready</em>
             </span>
             <span class="status-pill status-mand" id="statusItemSig">
               ✍️ Signature: <em>Required</em>
@@ -182,7 +166,7 @@
       </div>
     </section>
 
-    <!-- Section Navigation Quick Bar (No numbers) -->
+    <!-- Section Navigation Quick Bar (Clean, no numbers) -->
     <nav class="section-nav" aria-label="Section Navigation">
       <a href="#sec-screening" class="nav-item active">
         <span class="nav-text">Client Screening</span>
@@ -190,14 +174,14 @@
       <a href="#sec-parq" class="nav-item">
         <span class="nav-text">PAR-Q (10 Questions)</span>
       </a>
-      <a href="#sec-assessment" class="nav-item">
-        <span class="nav-text">Initial Assessment</span>
-      </a>
       <a href="#sec-barriers" class="nav-item">
         <span class="nav-text">Exercise Barriers</span>
       </a>
       <a href="#sec-notes" class="nav-item">
         <span class="nav-text">Client Notes</span>
+      </a>
+      <a href="#sec-assessment" class="nav-item">
+        <span class="nav-text">Initial Assessment</span>
       </a>
     </nav>
 
@@ -258,113 +242,116 @@
                 <div class="form-group">
                   <label for="height" class="form-label">Height</label>
                   <div class="input-with-unit">
-                    <input type="text" id="height" name="height" class="form-control" placeholder="175 cm">
+                    <input type="text" id="height" name="height" class="form-control" placeholder="175">
+                    <span class="unit-tag">cm</span>
                   </div>
                 </div>
                 <div class="form-group">
                   <label for="weight" class="form-label">Weight</label>
                   <div class="input-with-unit">
-                    <input type="text" id="weight" name="weight" class="form-control" placeholder="70 kg">
+                    <input type="text" id="weight" name="weight" class="form-control" placeholder="72">
+                    <span class="unit-tag">kg</span>
                   </div>
                 </div>
+              </div>
+
+              <!-- Live BMI Readout Banner -->
+              <div class="bmi-strip mt-3" id="bmiStrip">
+                <div class="bmi-left">
+                  <span class="bmi-label">CALCULATED BMI:</span>
+                  <span class="bmi-val" id="bmiDisplay">--</span>
+                  <span class="badge-bmi" id="bmiBadge">AWAITING METRICS</span>
+                </div>
+                <div class="bmi-right">
+                  <span>Standard Category Scale: Normal 18.5 - 24.9 | Overweight 25 - 29.9 | Obese &ge; 30</span>
+                </div>
+              </div>
+
+              <div class="grid grid-3 mt-3">
                 <div class="form-group">
                   <label for="age" class="form-label">Age</label>
-                  <input type="text" id="age" name="age" class="form-control" placeholder="28">
-                </div>
-              </div>
-
-              <!-- Live BMI Mini Indicator -->
-              <div class="bmi-live-banner mt-3" id="bmiLiveBanner">
-                <span class="bmi-calc-label">⚡ Calculated BMI:</span>
-                <span class="bmi-val" id="bmiDisplay">--</span>
-                <span class="badge-bmi" id="bmiBadge">Awaiting height & weight</span>
-              </div>
-            </div>
-
-            <!-- Sub-table 3: Any Health Risk Factors -->
-            <div class="panel-box mb-4">
-              <div class="panel-header">Any health risk factors? Ensure the client also completes the PAR-Q</div>
-              <div class="form-group">
-                <textarea id="health_risk_factors" name="health_risk_factors" rows="2" class="form-control"
-                  placeholder="Note any cardiovascular, metabolic, orthopedic or familial risks observed during initial interview..."></textarea>
-              </div>
-            </div>
-
-            <!-- Sub-table 4: Medical History & Medications -->
-            <div class="panel-box mb-4">
-              <div class="panel-header">Client Medical History & Medications</div>
-              <div class="form-group mb-3">
-                <label for="medical_history" class="form-label">Client Medical history</label>
-                <textarea id="medical_history" name="medical_history" rows="2" class="form-control"
-                  placeholder="Past illnesses, chronic conditions, injuries, surgeries, rehabilitation history..."></textarea>
-              </div>
-              <div class="form-group">
-                <label for="medications" class="form-label">Client's Medications</label>
-                <input type="text" id="medications" name="medications" class="form-control"
-                  placeholder="Prescription medicines, supplements, vitamins, inhalers, or dosage schedules">
-              </div>
-            </div>
-
-            <!-- Sub-table 5: Lifestyle Evaluation -->
-            <div class="panel-box mb-4">
-              <div class="panel-header">Lifestyle Evaluation</div>
-              <div class="grid grid-2 mb-3">
-                <div class="form-group">
-                  <label for="occupation" class="form-label">Occupation</label>
-                  <input type="text" id="occupation" name="occupation" class="form-control"
-                    placeholder="e.g. Software Engineer (Desk-bound, 8 hrs/day)">
-                </div>
-                <div class="form-group">
-                  <label for="time_availability" class="form-label">Time availability on a weekly basis</label>
-                  <input type="text" id="time_availability" name="time_availability" class="form-control"
-                    placeholder="e.g. 4 days/week (Mon/Wed/Fri/Sat 7:00 AM)">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="lifestyle_summary" class="form-label">General Lifestyle summary (diet, sleep, habits)</label>
-                <textarea id="lifestyle_summary" name="lifestyle_summary" rows="2" class="form-control"
-                  placeholder="Average sleep hours, hydration, dietary patterns/macros, smoking, alcohol, stress levels, daily steps..."></textarea>
-              </div>
-            </div>
-
-            <!-- Sub-table 6: Current Fitness Profile -->
-            <div class="panel-box mb-4">
-              <div class="panel-header">Current Fitness Profile</div>
-              <div class="grid grid-3 mb-3">
-                <div class="form-group">
-                  <label for="activity_level" class="form-label">Physical activity levels</label>
-                  <select id="activity_level" name="activity_level" class="form-control">
-                    <option value="LOW">LOW (Sedentary / Light)</option>
-                    <option value="MEDIUM" selected>MEDIUM (Moderate, 2-3x/week)</option>
-                    <option value="HIGH">HIGH (Athletic / High Intensity)</option>
-                  </select>
+                  <input type="number" id="age" name="age" class="form-control" placeholder="e.g. 28" min="14" max="100">
                 </div>
                 <div class="form-group col-span-2">
-                  <label for="training_history" class="form-label">Exercise and training history</label>
-                  <input type="text" id="training_history" name="training_history" class="form-control"
-                    placeholder="Previous resistance training, sports, athletics, coaching experience">
+                  <label for="occupation" class="form-label">Occupation</label>
+                  <input type="text" id="occupation" name="occupation" class="form-control"
+                    placeholder="e.g. Senior Software Engineer / Desk-bound">
                 </div>
               </div>
-              <div class="form-group">
-                <label for="exercise_contraindications" class="form-label">Exercise contraindications</label>
-                <textarea id="exercise_contraindications" name="exercise_contraindications" rows="2" class="form-control"
-                  placeholder="Movements, loads, or postures that cause pain or must be avoided/modified"></textarea>
+
+              <div class="form-group mt-3">
+                <label for="health_risk_factors" class="form-label">Health & Risk Factors</label>
+                <textarea id="health_risk_factors" name="health_risk_factors" rows="2" class="form-control"
+                  placeholder="Identify known cardiovascular, metabolic, renal, orthopedic, or respiratory risk factors..."></textarea>
+              </div>
+
+              <div class="grid grid-2 mt-3">
+                <div class="form-group">
+                  <label for="medical_history" class="form-label">Medical History</label>
+                  <textarea id="medical_history" name="medical_history" rows="2" class="form-control"
+                    placeholder="Prior surgeries, recurring musculoskeletal injuries, sprains, chronic conditions..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="medications" class="form-label">Medications</label>
+                  <textarea id="medications" name="medications" rows="2" class="form-control"
+                    placeholder="Current prescription medications, dosage, beta-blockers, supplements..."></textarea>
+                </div>
               </div>
             </div>
 
-            <!-- Sub-table 7: Client's Exercise Preference -->
-            <div class="panel-box">
-              <div class="panel-header">Client's Exercise Preference</div>
-              <div class="grid grid-2">
-                <div class="form-group">
-                  <label for="exercise_likes" class="form-label">Likes</label>
-                  <textarea id="exercise_likes" name="exercise_likes" rows="3" class="form-control"
-                    placeholder="Preferred movements, barbell lifts, kettlebells, functional workouts, music, training styles..."></textarea>
+            <!-- Sub-table 3: Lifestyle & Physical Activity Profile -->
+            <div class="panel-box mb-4">
+              <div class="panel-header">Lifestyle, Availability & Activity History</div>
+              <div class="grid grid-3">
+                <div class="form-group col-span-2">
+                  <label for="time_availability" class="form-label">Time Availability</label>
+                  <input type="text" id="time_availability" name="time_availability" class="form-control"
+                    placeholder="e.g. 3 sessions/week, Mon/Wed/Fri mornings (6:30 - 7:45 AM)">
                 </div>
                 <div class="form-group">
-                  <label for="exercise_dislikes" class="form-label">Dislikes</label>
-                  <textarea id="exercise_dislikes" name="exercise_dislikes" rows="3" class="form-control"
-                    placeholder="Disliked exercises, long steady-state cardio, burpees, high impact movements..."></textarea>
+                  <label for="activity_level" class="form-label">Current Activity Level</label>
+                  <select id="activity_level" name="activity_level" class="form-control">
+                    <option value="SEDENTARY">Sedentary (Little or no exercise)</option>
+                    <option value="LIGHT">Light (1 - 2 days/week)</option>
+                    <option value="MEDIUM" selected>Medium / Moderate (3 - 4 days/week)</option>
+                    <option value="HIGH">High / Vigorous (5+ days/week)</option>
+                    <option value="EXTREME">Extreme / Athlete (Daily intense training)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="lifestyle_summary" class="form-label">Lifestyle Summary</label>
+                <textarea id="lifestyle_summary" name="lifestyle_summary" rows="2" class="form-control"
+                  placeholder="Nutrition quality, hydration, daily sleep duration, stress exposure, physical activity profile..."></textarea>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="training_history" class="form-label">Previous Training History</label>
+                <textarea id="training_history" name="training_history" rows="2" class="form-control"
+                  placeholder="Recreational fitness background, Pilates, bodyweight training, sports, Olympic lifting experience..."></textarea>
+              </div>
+            </div>
+
+            <!-- Sub-table 4: Exercise Preferences -->
+            <div class="panel-box">
+              <div class="panel-header">Exercise Preferences & Contraindications</div>
+              <div class="form-group">
+                <label for="exercise_contraindications" class="form-label">Any specific exercises that are contraindicated?</label>
+                <textarea id="exercise_contraindications" name="exercise_contraindications" rows="2" class="form-control"
+                  placeholder="Specific movements to avoid or modify (e.g. heavy unguided spinal loading, deep overhead press, high impact jumping)..."></textarea>
+              </div>
+
+              <div class="grid grid-2 mt-3">
+                <div class="form-group">
+                  <label for="exercise_likes" class="form-label">Specific exercises liked?</label>
+                  <textarea id="exercise_likes" name="exercise_likes" rows="2" class="form-control"
+                    placeholder="e.g. Barbell squats, kettlebell swings, rowing ergometer, functional mobility..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="exercise_dislikes" class="form-label">Specific exercises disliked?</label>
+                  <textarea id="exercise_dislikes" name="exercise_dislikes" rows="2" class="form-control"
+                    placeholder="e.g. Monotonous treadmill running, burpees, high rep crunches..."></textarea>
                 </div>
               </div>
             </div>
@@ -374,28 +361,28 @@
 
 
         <!-- =========================================================================
-             PAR-Q (Client to complete)
+             PHYSICAL ACTIVITY READINESS QUESTIONNAIRE (PAR-Q)
              ========================================================================= -->
         <article class="card-section" id="sec-parq">
           <div class="card-header">
             <div class="sec-title-group">
               <div class="sec-title-row">
                 <h2 class="sec-title">Physical Activity Readiness Questionnaire (PAR-Q)</h2>
-                <span class="sec-badge badge-mand">Client to complete</span>
+                <span class="sec-badge badge-mand">Safety Clearance & Legal Consent</span>
               </div>
-              <p class="sec-desc">Official 10-question health readiness screening, physician referral checks, assumption of risk, and legal client signature.</p>
+              <p class="sec-desc">10 essential medical safety questions to determine baseline exercise readiness and doctor clearance requirements.</p>
             </div>
           </div>
 
           <div class="card-body">
 
-            <!-- Client's Name & Date -->
+            <!-- Administration details -->
             <div class="panel-box mb-4">
               <div class="grid grid-2">
                 <div class="form-group">
                   <label for="parq_client_name" class="form-label">Client's Name</label>
-                  <input type="text" id="parq_client_name" name="parq_client_name" class="form-control"
-                    placeholder="Will sync from Section 1" readonly>
+                  <input type="text" id="parq_client_name" name="parq_client_name" class="form-control is-readonly-field"
+                    placeholder="Will sync automatically from client profile" readonly>
                 </div>
                 <div class="form-group">
                   <label for="parq_date" class="form-label">Date</label>
@@ -405,233 +392,173 @@
               </div>
             </div>
 
-            <!-- Official Preamble Notice -->
-            <div class="preamble-box mb-4">
-              <p class="preamble-p">
-                Taking part in physical activity/exercise is very safe for most people. However, some people should check with their doctor before they start an exercise session. Before taking part in physical activity and/or exercise, please answer the questions below. If you are between the ages of 15 and 69, the PAR-Q will tell you if you should check with your doctor before you start. If you are over 69 years of age, and you are not used to being very active, check with your doctor.
+            <!-- 10 Questions Table -->
+            <div class="parq-table-wrapper mb-4">
+              <table class="parq-table" aria-label="PAR-Q 10 Questions">
+                <thead>
+                  <tr>
+                    <th class="col-num">#</th>
+                    <th class="col-question">Questions</th>
+                    <th class="col-choice">YES</th>
+                    <th class="col-choice">NO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Q1 -->
+                  <tr class="parq-row">
+                    <td class="col-num">1</td>
+                    <td class="col-question">Has your doctor ever said that you have a heart condition and that you should only do physical activity recommended by a doctor?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q1" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q1" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q2 -->
+                  <tr class="parq-row">
+                    <td class="col-num">2</td>
+                    <td class="col-question">Do you feel pain in your chest when you do physical activity?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q2" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q2" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q3 -->
+                  <tr class="parq-row">
+                    <td class="col-num">3</td>
+                    <td class="col-question">In the past month, have you had chest pain when you were not doing physical activity?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q3" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q3" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q4 -->
+                  <tr class="parq-row">
+                    <td class="col-num">4</td>
+                    <td class="col-question">Do you lose your balance because of dizziness or do you ever lose consciousness?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q4" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q4" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q5 -->
+                  <tr class="parq-row">
+                    <td class="col-num">5</td>
+                    <td class="col-question">Do you have a bone or joint problem (for example, back, knee, or hip) that could be made worse by a change in your physical activity?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q5" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q5" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q6 -->
+                  <tr class="parq-row">
+                    <td class="col-num">6</td>
+                    <td class="col-question">Is your doctor currently prescribing drugs (for example, water pills) for your blood pressure or heart condition?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q6" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q6" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q7 -->
+                  <tr class="parq-row">
+                    <td class="col-num">7</td>
+                    <td class="col-question">Do you know of any other reason why you should not do physical activity?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q7" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q7" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q8 -->
+                  <tr class="parq-row">
+                    <td class="col-num">8</td>
+                    <td class="col-question">Are you pregnant, or have you had a baby in the last six months?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q8" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q8" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q9 -->
+                  <tr class="parq-row">
+                    <td class="col-num">9</td>
+                    <td class="col-question">Have you recently had surgery, or are you recovering from an illness?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q9" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q9" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                  <!-- Q10 -->
+                  <tr class="parq-row">
+                    <td class="col-num">10</td>
+                    <td class="col-question">Do you suffer from asthma, diabetes, or epilepsy?</td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q10" value="yes" class="parq-radio radio-yes"><span class="radio-custom"></span></label>
+                    </td>
+                    <td class="col-choice">
+                      <label class="radio-label"><input type="radio" name="parq_q10" value="no" class="parq-radio radio-no" checked><span class="radio-custom"></span></label>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Real-time Physician Warning Banner -->
+            <div class="parq-alert-box alert-clear" id="parqStatusBanner">
+              <div class="alert-icon" id="parqIcon">✅</div>
+              <div class="alert-text-group">
+                <div class="alert-title" id="parqTitle">EXCELLENT: ALL PAR-Q SCREENERS ANSWERED "NO"</div>
+                <div class="alert-desc" id="parqSubtitle">Client is cleared to participate in vigorous physical activity, baseline cardiovascular screens, and resistance assessments without preliminary medical referral.</div>
+              </div>
+            </div>
+
+            <!-- Signature Pad & Legal Consent -->
+            <div class="panel-box mt-4">
+              <div class="panel-header">Client Consent & Digital Signature</div>
+              <p class="signature-legal-notice">
+                I have read, understood and completed this questionnaire honestly and accurately. Any questions I had were answered to my full satisfaction. I understand that physical exercise involves inherent risks and hereby confirm my readiness to proceed.
               </p>
-              <p class="preamble-notice">
-                <strong>Common sense is your best guide when you answer these questions. Please read the questions carefully and answer each one honestly: please select YES or NO.</strong>
-              </p>
-            </div>
 
-            <!-- Live Safety Indicator -->
-            <div class="parq-status-card mb-4 safe" id="parqStatusBanner">
-              <div class="status-icon" id="parqIcon">🛡️</div>
-              <div class="status-content">
-                <div class="status-title" id="parqTitle">CLEARANCE: READY FOR PHYSICAL ACTIVITY</div>
-                <div class="status-sub" id="parqSubtitle">All 10 questions answered NO. Client is clear to initiate structured exercise.</div>
+              <div class="sig-tabs">
+                <button type="button" class="btn-sig-tab active" id="tabDrawSig">
+                  <span>✍️ Draw Signature</span>
+                </button>
+                <button type="button" class="btn-sig-tab" id="tabTypeSig">
+                  <span>⌨️ Type Full Name</span>
+                </button>
               </div>
-            </div>
 
-            <!-- 10 PAR-Q Questions Table -->
-            <div class="parq-questions-container mb-4">
-              
-              <!-- Q1 -->
-              <div class="parq-question-row">
-                <div class="q-number">1</div>
-                <div class="q-text">Has your doctor ever said that you have a heart condition and that you should only do physical activity/exercise recommended by a doctor?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q1" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q1" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
+              <!-- Canvas Pad -->
+              <div id="drawSigBox" class="signature-canvas-container">
+                <canvas id="sigCanvas" class="signature-canvas" width="600" height="130" aria-label="Digital signature canvas"></canvas>
+                <div class="sig-canvas-tools">
+                  <span class="sig-helper">Sign above with finger or mouse cursor</span>
+                  <button type="button" id="btnClearSig" class="btn btn-ghost btn-sm">Clear Signature</button>
                 </div>
+                <input type="hidden" id="client_signature_image" name="client_signature_image" value="">
               </div>
 
-              <!-- Q2 -->
-              <div class="parq-question-row">
-                <div class="q-number">2</div>
-                <div class="q-text">Is there any history of heart disease in your family?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q2" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q2" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q3 -->
-              <div class="parq-question-row">
-                <div class="q-number">3</div>
-                <div class="q-text">Do you feel pain in your chest when you do physical activity/exercise?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q3" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q3" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q4 -->
-              <div class="parq-question-row">
-                <div class="q-number">4</div>
-                <div class="q-text">In the past month, have you had chest pain when you were not doing physical activity/exercise?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q4" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q4" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q5 -->
-              <div class="parq-question-row">
-                <div class="q-number">5</div>
-                <div class="q-text">Do you lose your balance because of dizziness or do you ever lose consciousness?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q5" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q5" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q6 -->
-              <div class="parq-question-row">
-                <div class="q-number">6</div>
-                <div class="q-text">Do you have a bone or joint problem (for example, back, knee or hip) that could be made worse by a change in your physical activity? (if so, please give details)</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q6" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q6" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q7 -->
-              <div class="parq-question-row">
-                <div class="q-number">7</div>
-                <div class="q-text">Do you suffer from any of the following: asthma; diabetes; epilepsy; high blood pressure? (if so, please give details)</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q7" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q7" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q8 -->
-              <div class="parq-question-row">
-                <div class="q-number">8</div>
-                <div class="q-text">Do you have any other medical or physical condition (such as diabetes, cancer, osteoporosis)?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q8" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q8" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q9 -->
-              <div class="parq-question-row">
-                <div class="q-number">9</div>
-                <div class="q-text">Do you have any current injuries or conditions, and if so, are they being treated by a doctor or other health professional such as a physiotherapist? (if so, please give details)</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q9" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q9" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Q10 -->
-              <div class="parq-question-row">
-                <div class="q-number">10</div>
-                <div class="q-text">Do you know of any other reason why you should not do physical activity/exercise?</div>
-                <div class="q-actions">
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q10" value="yes">
-                    <span class="toggle-btn toggle-yes">Yes</span>
-                  </label>
-                  <label class="btn-toggle-option">
-                    <input type="radio" name="parq_q10" value="no" checked>
-                    <span class="toggle-btn toggle-no">No</span>
-                  </label>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Follow-up Guidance & Legal Declarations -->
-            <div class="legal-statements-box mb-4">
-              <div class="legal-clause">
-                <strong>If you answered YES</strong> to any of the questions above, please check with a member of staff before taking part in the physical activity or exercise session. It may be necessary for you to be referred to your doctor before taking part in the session.
-              </div>
-              <div class="legal-clause">
-                <strong>If you answered NO</strong> to all questions, you can be reasonably sure that you can safely take part in the physical activity or exercise sessions, but please ensure that you begin slowly, warm up appropriately and progress slowly.
-              </div>
-              <div class="legal-clause callout-risk">
-                <strong>Assumption of Risk:</strong> I declare that I have read, understood, and answered honestly all the questions above. I am agreeing to participate in the exercise session (which may include aerobic, resistance, power and stretching exercises) and understand that there may be risks associated with physical activity.
-              </div>
-              <div class="legal-clause italic">
-                I have read, understood and completed this questionnaire. Any questions I had were answered to my full satisfaction.
-              </div>
-            </div>
-
-            <!-- Signature Box -->
-            <div class="panel-box">
-              <div class="panel-header">Client's Signature & Date</div>
-
-              <div class="sig-mode-selector mb-3">
-                <span class="sig-mode-label">Signature Mode:</span>
-                <button type="button" class="btn-sig-tab active" id="tabDrawSig">✍️ Draw Signature</button>
-                <button type="button" class="btn-sig-tab" id="tabTypeSig">⌨️ Type Name</button>
-              </div>
-
-              <!-- Draw Signature Canvas Box -->
-              <div class="signature-canvas-container" id="drawSigBox">
-                <div class="canvas-header">
-                  <span class="canvas-title">Touch / Mouse Signature Canvas</span>
-                  <button type="button" id="btnClearSig" class="btn-canvas-action">Clear Drawing</button>
-                </div>
-                <canvas id="sigCanvas" width="600" height="130" class="signature-canvas"></canvas>
-                <p class="canvas-hint">Use mouse or finger/stylus to sign within the designated box.</p>
-                <input type="hidden" id="client_signature_image" name="client_signature_image">
-              </div>
-
-              <!-- Type Signature Input Box -->
-              <div class="signature-type-container hidden" id="typeSigBox">
+              <!-- Typed Mode -->
+              <div id="typeSigBox" class="signature-type-container hidden">
                 <div class="form-group">
-                  <label for="client_signature" class="form-label">Client Digital Signature (Printed Name)</label>
-                  <input type="text" id="client_signature" name="client_signature" class="form-control font-signature"
-                    placeholder="e.g. Alex Morgan">
+                  <label for="client_signature" class="form-label">Type Legal Name to Sign</label>
+                  <input type="text" id="client_signature" name="client_signature" class="form-control sig-typed-input"
+                    placeholder="Type full legal name as official signature">
                 </div>
               </div>
 
@@ -642,283 +569,6 @@
                     placeholder="DD/MM/YYYY">
                 </div>
               </div>
-            </div>
-
-          </div>
-        </article>
-
-
-        <!-- =========================================================================
-             INITIAL ASSESSMENT (Trainer to complete in lab)
-             ========================================================================= -->
-        <article class="card-section" id="sec-assessment">
-          <div class="card-header">
-            <div class="sec-title-group">
-              <div class="sec-title-row">
-                <h2 class="sec-title">Initial Assessment</h2>
-                <span class="sec-badge badge-readonly" id="assessRoleBadge">🔒 Trainer Assessment — Read Only</span>
-              </div>
-              <p class="sec-desc">Physical Measurements and Fitness Assessments Record. Evaluated and completed exclusively by the trainer in the lab.</p>
-            </div>
-          </div>
-
-          <div class="card-body">
-
-            <!-- Read-only Notice for Clients -->
-            <div class="assessment-readonly-banner" id="assessReadonlyNotice">
-              <div class="readonly-badge-tag">🔒 Trainer Assessment — Read Only</div>
-              <p class="readonly-desc">This section is evaluated and recorded exclusively by Keerthan Strength Lab coaches in the lab. Recorded test observations and justifications appear below.</p>
-            </div>
-
-            <!-- Trainer Action Bar (Visible in Trainer Mode only) -->
-            <div class="assessment-trainer-toolbar hidden" id="assessTrainerToolbar">
-              <div class="trainer-active-pill">
-                <span class="trainer-pulse-dot"></span>
-                <span>Trainer Mode Active &bull; Full Clinical Edit Access</span>
-              </div>
-              <button type="button" id="btnSaveAssessment" class="btn btn-gold btn-sm">
-                <span class="btn-icon">💾</span>
-                <span>Save Assessment Results</span>
-              </button>
-            </div>
-
-            <!-- Administration details -->
-            <div class="panel-box mb-4">
-              <div class="panel-header">Assessment Administration</div>
-              <div class="grid grid-3">
-                <div class="form-group">
-                  <label for="assessment_client_name" class="form-label">Client's Name</label>
-                  <input type="text" id="assessment_client_name" name="assessment_client_name" class="form-control is-readonly-field"
-                    placeholder="Will sync from client profile" readonly>
-                </div>
-                <div class="form-group">
-                  <label for="instructor_name" class="form-label">Instructor's Name</label>
-                  <input type="text" id="instructor_name" name="instructor_name" class="form-control"
-                    placeholder="Keerthan" value="Keerthan">
-                </div>
-                <div class="form-group">
-                  <label for="assessment_date" class="form-label">Date</label>
-                  <input type="text" id="assessment_date" name="assessment_date" class="form-control"
-                    placeholder="DD/MM/YYYY">
-                </div>
-              </div>
-            </div>
-
-            <!-- Banner notice -->
-            <div class="test-selection-instruction mb-4">
-              <div class="instruction-left">
-                <strong>Physical Measurements and Fitness Assessments Record</strong>
-                <p id="testInstructionText">Trainer selects conducted clinical tests in the lab (minimum of three recommended).</p>
-              </div>
-              <div class="instruction-badge" id="testSelectionBadge">
-                <span class="badge-count" id="badgeCountDisplay">0 / 3</span>
-                <span class="badge-status-txt" id="badgeStatusDisplay">Tests Selected</span>
-              </div>
-            </div>
-
-            <!-- Hidden field for chosen tests -->
-            <input type="hidden" id="chosen_tests" name="chosen_tests" value="">
-
-            <!-- 7 Assessment Domain Cards -->
-            <div class="assessment-cards-grid">
-
-              <!-- 1. Blood Pressure -->
-              <div class="assessment-card" data-domain="bp">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">1</span>
-                    <h4>Blood pressure</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="manual">manual</button>
-                    <button type="button" class="test-chip" data-test="digital">digital</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="bp_results" name="bp_results" class="form-control"
-                      placeholder="e.g. 116/74 mmHg, Resting HR: 62 bpm">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="bp_reasons" name="bp_reasons" class="form-control"
-                      placeholder="e.g. Standard baseline cardiovascular health screen">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. Anthropometrics -->
-              <div class="assessment-card" data-domain="anthro">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">2</span>
-                    <h4>Anthropometrics</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="bmi">BMI</button>
-                    <button type="button" class="test-chip" data-test="waist circumference">waist circumference</button>
-                    <button type="button" class="test-chip" data-test="waist to hip ratio">waist to hip ratio</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="anthro_results" name="anthro_results" class="form-control"
-                      placeholder="e.g. BMI: 22.7 | Waist: 70 cm | WHR: 0.74">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="anthro_reasons" name="anthro_reasons" class="form-control"
-                      placeholder="e.g. Track body composition and visceral adiposity over time">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Body Composition -->
-              <div class="assessment-card" data-domain="body_comp">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">3</span>
-                    <h4>Body composition</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="skinfolds callipers">skinfolds callipers</button>
-                    <button type="button" class="test-chip" data-test="bio-electrical impedance">bio-electrical impedance</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="body_comp_results" name="body_comp_results" class="form-control"
-                      placeholder="e.g. Body Fat: 21.4% (InBody multi-frequency scan)">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="body_comp_reasons" name="body_comp_reasons" class="form-control"
-                      placeholder="e.g. Fast, non-invasive assessment of lean mass vs fat mass">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 4. Muscular Strength & Endurance -->
-              <div class="assessment-card" data-domain="muscular">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">4</span>
-                    <h4>Muscular strength and endurance</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="sit-up">sit-up</button>
-                    <button type="button" class="test-chip" data-test="press up">press up</button>
-                    <button type="button" class="test-chip" data-test="back extension">back extension</button>
-                    <button type="button" class="test-chip" data-test="repetition maximum tests">1RM / Rep Max (bench, squat, deadlift)</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="muscular_results" name="muscular_results" class="form-control"
-                      placeholder="e.g. Press-ups: 22 reps, Plank: 1:45, Squat: 20kg x 12">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="muscular_reasons" name="muscular_reasons" class="form-control"
-                      placeholder="e.g. Determine baseline upper body and core muscular endurance">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 5. Cardiovascular Fitness -->
-              <div class="assessment-card" data-domain="cardio">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">5</span>
-                    <h4>Cardiovascular fitness</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="balke treadmill">Balke treadmill</button>
-                    <button type="button" class="test-chip" data-test="astrand bike test">Astrand Bike</button>
-                    <button type="button" class="test-chip" data-test="rockport walking test">Rockport walking</button>
-                    <button type="button" class="test-chip" data-test="submaximal predictive test">submaximal predictive</button>
-                    <button type="button" class="test-chip" data-test="multistage fitness test">multistage test</button>
-                    <button type="button" class="test-chip" data-test="cooper 1.5-mile run">Cooper 1.5-mile</button>
-                    <button type="button" class="test-chip" data-test="queens college step">Queens College step</button>
-                    <button type="button" class="test-chip" data-test="other ergometer tests">other ergometer</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="cardio_results" name="cardio_results" class="form-control"
-                      placeholder="e.g. Rockport 1-mile: 13:40, HR 128 bpm, VO2max est 41.2 ml/kg/min">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="cardio_reasons" name="cardio_reasons" class="form-control"
-                      placeholder="e.g. Low-impact aerobic test chosen for joint safety">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 6. Specific Range of Movement (ROM) -->
-              <div class="assessment-card" data-domain="rom">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">6</span>
-                    <h4>Specific range of movement (ROM)</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="soleus and gastrocnemius">soleus & calf</button>
-                    <button type="button" class="test-chip" data-test="hamstrings">hamstrings</button>
-                    <button type="button" class="test-chip" data-test="quadriceps and hip flexors">quads & hip flexors</button>
-                    <button type="button" class="test-chip" data-test="pectoralis major">pec major</button>
-                    <button type="button" class="test-chip" data-test="latissimus dorsi">lats</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="rom_results" name="rom_results" class="form-control"
-                      placeholder="e.g. Hamstrings: 85 deg, Shoulder flexion: full 180 deg, Ankle dorsiflexion: 35 deg">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="rom_reasons" name="rom_reasons" class="form-control"
-                      placeholder="e.g. Screen lower body mechanics for safe squat and deadlift execution">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 7. Posture and Alignment Observation -->
-              <div class="assessment-card" data-domain="posture">
-                <div class="card-top-row">
-                  <div class="domain-title">
-                    <span class="domain-num">7</span>
-                    <h4>Posture and Alignment observation</h4>
-                  </div>
-                  <div class="test-chips-selector">
-                    <button type="button" class="test-chip" data-test="head">head</button>
-                    <button type="button" class="test-chip" data-test="shoulders">shoulders</button>
-                    <button type="button" class="test-chip" data-test="pelvis and lumbar spine">pelvis & lumbar</button>
-                    <button type="button" class="test-chip" data-test="knees">knees</button>
-                    <button type="button" class="test-chip" data-test="feet and ankles">feet & ankles</button>
-                  </div>
-                </div>
-                <div class="grid grid-2 mt-2">
-                  <div class="form-group">
-                    <label class="form-label-sm">Results / Observations</label>
-                    <input type="text" id="posture_results" name="posture_results" class="form-control"
-                      placeholder="e.g. Mild forward head posture, anterior pelvic tilt from desk work, knees tracking neutral">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label-sm">Reason for choice / Justification</label>
-                    <input type="text" id="posture_reasons" name="posture_reasons" class="form-control"
-                      placeholder="e.g. Prescribe corrective postural exercises and thoracic extension drills">
-                  </div>
-                </div>
-              </div>
-
             </div>
 
           </div>
@@ -981,7 +631,7 @@
                 <h2 class="sec-title">Client Notes / Additional Information</h2>
                 <span class="sec-badge badge-optional">Optional</span>
               </div>
-              <p class="sec-desc">Tell us anything else you'd like your trainer to know.</p>
+              <p class="sec-desc">Tell us anything else you'd like us to know.</p>
             </div>
           </div>
 
@@ -990,9 +640,268 @@
               <div class="form-group">
                 <label for="client_notes" class="form-label">Client Notes & Personal Considerations</label>
                 <textarea id="client_notes" name="client_notes" rows="4" class="form-control form-control-compact"
-                  placeholder="Tell us anything else you'd like your trainer to know (e.g. personal fitness goals, joint or health concerns, scheduling preferences, training background nuances, specific questions, or anything not covered elsewhere in the form)..."></textarea>
+                  placeholder="Tell us anything else you'd like us to know (e.g. personal goals, concerns, preferences, questions, or anything else you'd like your trainer to know)..."></textarea>
               </div>
             </div>
+          </div>
+        </article>
+
+
+        <!-- =========================================================================
+             INITIAL ASSESSMENT (Trainer Record — Display Only)
+             ========================================================================= -->
+        <article class="card-section" id="sec-assessment">
+          <div class="card-header">
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Initial Assessment</h2>
+                <span class="sec-badge badge-readonly" id="assessRoleBadge">Trainer Assessment — Read Only</span>
+              </div>
+              <p class="sec-desc">Physical Measurements and Fitness Assessments Record provided by the trainer in the lab.</p>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <!-- Read-only Notice for Clients -->
+            <div class="assessment-readonly-banner" id="assessReadonlyNotice">
+              <div class="readonly-badge-tag">Trainer Assessment — Read Only</div>
+              <p class="readonly-desc">The physical measurements and fitness assessment records below are provided by your trainer in the lab.</p>
+            </div>
+
+            <!-- Administration details -->
+            <div class="panel-box mb-4">
+              <div class="panel-header">Assessment Administration</div>
+              <div class="grid grid-3">
+                <div class="form-group">
+                  <label for="assessment_client_name" class="form-label">Client's Name</label>
+                  <input type="text" id="assessment_client_name" name="assessment_client_name" class="form-control is-readonly-field"
+                    placeholder="Will sync from client profile" readonly tabindex="-1">
+                </div>
+                <div class="form-group">
+                  <label for="instructor_name" class="form-label">Instructor's Name</label>
+                  <input type="text" id="instructor_name" name="instructor_name" class="form-control"
+                    placeholder="Keerthan" value="Keerthan" readonly tabindex="-1">
+                </div>
+                <div class="form-group">
+                  <label for="assessment_date" class="form-label">Date</label>
+                  <input type="text" id="assessment_date" name="assessment_date" class="form-control"
+                    placeholder="DD/MM/YYYY" readonly tabindex="-1">
+                </div>
+              </div>
+            </div>
+
+            <!-- Banner notice -->
+            <div class="test-selection-instruction mb-4">
+              <div class="instruction-left">
+                <strong>Physical Measurements and Fitness Assessments Record</strong>
+                <p id="testInstructionText">Clinical fitness assessment protocols evaluated and recorded in the lab.</p>
+              </div>
+              <div class="instruction-badge" id="testSelectionBadge">
+                <span class="badge-count" id="badgeCountDisplay">8 Recorded</span>
+                <span class="badge-status-txt" id="badgeStatusDisplay">Lab Battery</span>
+              </div>
+            </div>
+
+            <!-- Hidden field for chosen tests -->
+            <input type="hidden" id="chosen_tests" name="chosen_tests" value="digital,bmi,waist circumference,bio-electrical impedance,press up,rockport walking test,hamstrings,shoulders">
+
+            <!-- 7 Assessment Domain Cards (Display Only) -->
+            <div class="assessment-cards-grid">
+
+              <!-- Blood Pressure -->
+              <div class="assessment-card" data-domain="bp">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Blood pressure</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="manual" tabindex="-1">manual</button>
+                    <button type="button" class="test-chip active" data-test="digital" tabindex="-1">digital</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="bp_results" name="bp_results" class="form-control"
+                      value="116/74 mmHg (Resting HR: 62 bpm)" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="bp_reasons" name="bp_reasons" class="form-control"
+                      value="Routine baseline assessment before high-intensity resistance." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Anthropometrics -->
+              <div class="assessment-card" data-domain="anthro">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Anthropometrics</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip active" data-test="bmi" tabindex="-1">BMI</button>
+                    <button type="button" class="test-chip active" data-test="waist circumference" tabindex="-1">waist circumference</button>
+                    <button type="button" class="test-chip" data-test="waist to hip ratio" tabindex="-1">waist to hip ratio</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="anthro_results" name="anthro_results" class="form-control"
+                      value="BMI: 22.7 (Normal weight) | Waist: 70 cm | WHR: 0.74" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="anthro_reasons" name="anthro_reasons" class="form-control"
+                      value="Standard body composition metrics to gauge progress over 12 weeks." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Body Composition -->
+              <div class="assessment-card" data-domain="body_comp">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Body composition</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="skinfolds callipers" tabindex="-1">skinfolds callipers</button>
+                    <button type="button" class="test-chip active" data-test="bio-electrical impedance" tabindex="-1">bio-electrical impedance</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="body_comp_results" name="body_comp_results" class="form-control"
+                      value="Body Fat: 21.4% (via bio-electrical impedance scan)" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="body_comp_reasons" name="body_comp_reasons" class="form-control"
+                      value="Selected bio-electrical impedance for non-invasive speed and comfort." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Muscular Strength & Endurance -->
+              <div class="assessment-card" data-domain="muscular">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Muscular strength and endurance</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="sit-up" tabindex="-1">sit-up</button>
+                    <button type="button" class="test-chip active" data-test="press up" tabindex="-1">press up</button>
+                    <button type="button" class="test-chip" data-test="back extension" tabindex="-1">back extension</button>
+                    <button type="button" class="test-chip" data-test="repetition maximum tests" tabindex="-1">1RM / Rep Max (bench, squat, deadlift)</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="muscular_results" name="muscular_results" class="form-control"
+                      value="Push-ups: 22 reps | Plank: 1 min 45 sec | Goblet Squat: 20kg x 12 reps" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="muscular_reasons" name="muscular_reasons" class="form-control"
+                      value="Baseline muscular endurance and core stability screen." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cardiovascular Fitness -->
+              <div class="assessment-card" data-domain="cardio">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Cardiovascular fitness</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="balke treadmill" tabindex="-1">Balke treadmill</button>
+                    <button type="button" class="test-chip" data-test="astrand bike test" tabindex="-1">Astrand Bike</button>
+                    <button type="button" class="test-chip active" data-test="rockport walking test" tabindex="-1">Rockport walking</button>
+                    <button type="button" class="test-chip" data-test="submaximal predictive test" tabindex="-1">submaximal predictive</button>
+                    <button type="button" class="test-chip" data-test="multistage fitness test" tabindex="-1">multistage test</button>
+                    <button type="button" class="test-chip" data-test="cooper 1.5-mile run" tabindex="-1">Cooper 1.5-mile</button>
+                    <button type="button" class="test-chip" data-test="queens college step" tabindex="-1">Queens College step</button>
+                    <button type="button" class="test-chip" data-test="other ergometer tests" tabindex="-1">other ergometer</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="cardio_results" name="cardio_results" class="form-control"
+                      value="Rockport Walking Test: Estimated VO2max 41.2 ml/kg/min (Good)" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="cardio_reasons" name="cardio_reasons" class="form-control"
+                      value="Low impact walking test chosen due to previous ankle history." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Range of Movement (ROM) -->
+              <div class="assessment-card" data-domain="rom">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Specific range of movement (ROM)</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="soleus and gastrocnemius" tabindex="-1">soleus & calf</button>
+                    <button type="button" class="test-chip active" data-test="hamstrings" tabindex="-1">hamstrings</button>
+                    <button type="button" class="test-chip" data-test="quadriceps and hip flexors" tabindex="-1">quads & hip flexors</button>
+                    <button type="button" class="test-chip" data-test="pectoralis major" tabindex="-1">pec major</button>
+                    <button type="button" class="test-chip" data-test="latissimus dorsi" tabindex="-1">lats</button>
+                    <button type="button" class="test-chip active" data-test="shoulders" tabindex="-1">shoulders</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="rom_results" name="rom_results" class="form-control"
+                      value="Hamstrings: Normal (85 deg) | Shoulder Flexion: Full ROM (180 deg) | Ankle Dorsiflexion: Symmetrical 35 deg" readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="rom_reasons" name="rom_reasons" class="form-control"
+                      value="Screening mobility for safe squat and deadlift mechanics." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Posture and Alignment Observation -->
+              <div class="assessment-card" data-domain="posture">
+                <div class="card-top-row">
+                  <div class="domain-title">
+                    <h4>Posture and Alignment observation</h4>
+                  </div>
+                  <div class="test-chips-selector">
+                    <button type="button" class="test-chip" data-test="head" tabindex="-1">head</button>
+                    <button type="button" class="test-chip" data-test="shoulders" tabindex="-1">shoulders</button>
+                    <button type="button" class="test-chip" data-test="pelvis and lumbar spine" tabindex="-1">pelvis & lumbar</button>
+                    <button type="button" class="test-chip" data-test="knees" tabindex="-1">knees</button>
+                    <button type="button" class="test-chip" data-test="feet and ankles" tabindex="-1">feet & ankles</button>
+                  </div>
+                </div>
+                <div class="grid grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label-sm">Results / Observations</label>
+                    <input type="text" id="posture_results" name="posture_results" class="form-control"
+                      value="Slight anterior pelvic tilt and forward head posture from computer work. Knees tracking neutral." readonly tabindex="-1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label-sm">Reason for choice / Justification</label>
+                    <input type="text" id="posture_reasons" name="posture_reasons" class="form-control"
+                      value="Crucial for tailoring corrective warm-up and posterior chain volume." readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </article>
 
@@ -1003,10 +912,6 @@
             <span>All entries will be stamped onto the official Keerthan Strength Lab Assessment Dossier.</span>
           </div>
           <div class="submit-buttons">
-            <button type="button" id="btnRegisterClient" class="btn btn-secondary btn-lg" title="Save profile and client notes to database">
-              <span class="btn-icon">💾</span>
-              <span>Save & Register Intake</span>
-            </button>
             <button type="button" id="btnPreviewBottom" class="btn btn-secondary btn-lg">
               <span>👁️ Live Preview</span>
             </button>
@@ -1038,11 +943,11 @@
 
   <!-- 4-Page PDF Preview Modal -->
   <div class="modal-backdrop" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-xl">
       <div class="modal-header">
         <div class="modal-title-group">
-          <h3 class="modal-title">Official Dossier Live Preview (4 Pages)</h3>
-          <p class="modal-subtitle">Review all 4 pages before downloading the official document.</p>
+          <h3 class="modal-title">Official PDF Dossier Preview</h3>
+          <p class="modal-subtitle">Direct vector rendering from Keerthan Strength Lab official four-page assessment template.</p>
         </div>
         <button type="button" class="btn-close-modal" id="btnClosePreview" aria-label="Close Preview">&times;</button>
       </div>
@@ -1074,59 +979,6 @@
           <span class="btn-icon">📥</span>
           <span>Download PDF Now</span>
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Trainer Authentication Modal -->
-  <div class="modal-backdrop" id="trainerAuthModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-sm">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3 class="modal-title">Trainer Authentication</h3>
-          <p class="modal-subtitle">Keerthan Strength Lab Coaching Portal</p>
-        </div>
-        <button type="button" class="btn-close-modal" id="btnCloseTrainerAuth" aria-label="Close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="trainerAuthForm" autocomplete="off">
-          <div class="form-group mb-3">
-            <label for="trainerPasscode" class="form-label">Master Trainer Passcode</label>
-            <input type="password" id="trainerPasscode" class="form-control" placeholder="Enter coach passcode..." autocomplete="current-password" required>
-            <span class="form-hint">Default Coach Passcode: <code>keerthan2026</code></span>
-          </div>
-          <div class="modal-actions-row">
-            <button type="button" class="btn btn-secondary" id="btnCancelTrainerAuth">Cancel</button>
-            <button type="submit" class="btn btn-gold" id="btnSubmitTrainerAuth">
-              <span class="btn-icon">🔓</span>
-              <span>Unlock Trainer Access</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Client Records Roster Modal (Trainer Only) -->
-  <div class="modal-backdrop" id="clientRosterModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-lg">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3 class="modal-title">Registered Client Records</h3>
-          <p class="modal-subtitle">View intake details, read Client Notes, or complete clinical Initial Assessments.</p>
-        </div>
-        <button type="button" class="btn-close-modal" id="btnCloseClientRoster" aria-label="Close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="roster-search-bar mb-3">
-          <input type="text" id="rosterSearchInput" class="form-control" placeholder="🔍 Search clients by name...">
-        </div>
-        <div class="roster-list-container" id="rosterListContainer">
-          <!-- Populated dynamically via app.js -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btnCloseClientRosterBottom">Close</button>
       </div>
     </div>
   </div>

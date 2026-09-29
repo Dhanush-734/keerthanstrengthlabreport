@@ -5,36 +5,8 @@ import base64
 from flask import Flask, request, jsonify, send_file, send_from_directory
 import pymupdf
 from pdf_service import generate_screening_pdf
-import database
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-
-# Initialize SQLite database on startup
-database.init_db()
-
-TRAINER_PASSCODE = os.environ.get('TRAINER_PASSCODE', 'keerthan2026').strip().lower()
-TRAINER_AUTH_TOKEN = 'ksl_trainer_token_auth_2026'
-
-def is_trainer_authorized(req):
-    """Verify whether the incoming request has valid trainer credentials."""
-    # Check X-Trainer-Key header
-    trainer_key = req.headers.get('X-Trainer-Key', '').strip()
-    if trainer_key and (trainer_key.lower() == TRAINER_PASSCODE or trainer_key == TRAINER_AUTH_TOKEN):
-        return True
-
-    # Check Authorization header (Bearer token)
-    auth_header = req.headers.get('Authorization', '').strip()
-    if auth_header.startswith('Bearer '):
-        token = auth_header[7:].strip()
-        if token.lower() == TRAINER_PASSCODE or token == TRAINER_AUTH_TOKEN:
-            return True
-
-    # Check query param (for quick debugging/API testing)
-    q_key = req.args.get('trainer_key', '').strip()
-    if q_key and (q_key.lower() == TRAINER_PASSCODE or q_key == TRAINER_AUTH_TOKEN):
-        return True
-
-    return False
 
 @app.route('/')
 def index():
@@ -44,8 +16,7 @@ def index():
 def health():
     return jsonify({
         'status': 'ok',
-        'service': 'Keerthan Strength Lab Screening & Assessment API',
-        'database': 'sqlite3'
+        'service': 'Keerthan Strength Lab Screening & Assessment Portal'
     })
 
 @app.route('/api/sample-data')
@@ -96,7 +67,7 @@ def get_sample_data():
         # Client Notes / Additional Information
         'client_notes': 'Primary goal is preparing for an autumn half-marathon while improving thoracic mobility and lower back stability. Prefer 7 AM sessions.',
 
-        # Initial Assessment (Trainer-Only)
+        # Initial Assessment (Trainer-Only Record)
         'assessment_client_name': 'Alex Morgan',
         'instructor_name': 'Keerthan',
         'assessment_date': '29/09/2026',
@@ -117,111 +88,6 @@ def get_sample_data():
         'posture_reasons': 'Crucial for tailoring corrective warm-up and posterior chain volume.'
     }
     return jsonify(sample)
-
-@app.route('/api/trainer/login', methods=['POST', 'OPTIONS'])
-def trainer_login():
-    """Authenticate trainer using secure passcode."""
-    if request.method == 'OPTIONS':
-        return ('', 204)
-    data = request.get_json(force=True) or {}
-    passcode = str(data.get('passcode', '')).strip().lower()
-
-    if passcode == TRAINER_PASSCODE:
-        return jsonify({
-            'success': True,
-            'token': TRAINER_AUTH_TOKEN,
-            'trainer_name': 'Keerthan (Master Trainer)',
-            'role': 'trainer'
-        })
-    else:
-        return jsonify({
-            'success': False,
-            'error': 'Invalid trainer passcode. Access restricted to authorized coaches.'
-        }), 401
-
-@app.route('/api/register', methods=['POST', 'OPTIONS'])
-@app.route('/api/clients', methods=['POST', 'OPTIONS'])
-def register_client():
-    """Client registration endpoint. Rejects attempts to modify Initial Assessment without trainer role."""
-    if request.method == 'OPTIONS':
-        return ('', 204)
-    data = request.get_json(force=True) or {}
-
-    # Strict Role-Based Permission Check:
-    # A client is strictly forbidden from supplying or modifying Initial Assessment fields!
-    trainer_authorized = is_trainer_authorized(request)
-
-    assessment_attempts = []
-    for f in database.ASSESSMENT_FIELDS:
-        val = data.get(f)
-        if val is not None and val != '' and val != [] and val != {}:
-            assessment_attempts.append(f)
-
-    if assessment_attempts and not trainer_authorized:
-        return jsonify({
-            'error': 'Permission Denied: Initial Assessment can only be completed and modified by authorized trainers.',
-            'code': 'TRAINER_AUTH_REQUIRED',
-            'unauthorized_fields': assessment_attempts
-        }), 403
-
-    # Client can freely register and provide demographics, PAR-Q, barriers, and client_notes
-    client_record = database.save_client_registration(data)
-    return jsonify({
-        'status': 'ok',
-        'message': 'Client profile successfully registered.',
-        'client': client_record
-    }), 201
-
-@app.route('/api/clients', methods=['GET'])
-def get_clients_list():
-    """List registered clients (summary for trainer roster)."""
-    clients = database.list_clients()
-    return jsonify({
-        'status': 'ok',
-        'clients': clients,
-        'count': len(clients)
-    })
-
-@app.route('/api/clients/<client_id>', methods=['GET'])
-def get_client_profile(client_id):
-    """Retrieve full client profile."""
-    client = database.get_client_by_id(client_id)
-    if not client:
-        return jsonify({'error': f'Client {client_id} not found'}), 404
-    return jsonify({
-        'status': 'ok',
-        'client': client
-    })
-
-@app.route('/api/trainer/assessment', methods=['POST', 'PUT', 'OPTIONS'])
-@app.route('/api/clients/<client_id>/assessment', methods=['POST', 'PUT', 'OPTIONS'])
-def save_trainer_assessment(client_id=None):
-    """Trainer-only endpoint to record or update Initial Assessment data."""
-    if request.method == 'OPTIONS':
-        return ('', 204)
-
-    # Verify trainer authorization
-    if not is_trainer_authorized(request):
-        return jsonify({
-            'error': 'Forbidden: Authorized trainer credentials required to record or update Initial Assessment.',
-            'code': 'INVALID_TRAINER_KEY'
-        }), 403
-
-    data = request.get_json(force=True) or {}
-    target_id = client_id or data.get('client_id')
-
-    if not target_id:
-        return jsonify({'error': 'Missing client_id for assessment update'}), 400
-
-    updated_client = database.update_initial_assessment(target_id, data)
-    if not updated_client:
-        return jsonify({'error': f'Client {target_id} not found'}), 404
-
-    return jsonify({
-        'status': 'ok',
-        'message': f'Initial Assessment saved successfully for {updated_client.get("client_name")}.',
-        'client': updated_client
-    })
 
 @app.route('/api/generate-pdf', methods=['POST', 'OPTIONS'])
 def generate_pdf_endpoint():
@@ -267,8 +133,8 @@ def preview_pdf_endpoint():
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Trainer-Key')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     return response
 
 if __name__ == '__main__':

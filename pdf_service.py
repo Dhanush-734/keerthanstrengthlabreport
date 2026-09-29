@@ -612,8 +612,8 @@ def render_page_4(doc, data, is_fillable=False):
     th_notes_h = 24.0
     draw_cell(p, left_m, y, content_w, th_notes_h, bg_color=C_TH_BG)
     cell_text_single(p, "Client Notes / Additional Information", left_m + 8, y + 2, content_w - 16, 12.0, fontsize=8.8, bold=True)
-    draw_wrapped_text(p, "Tell us anything else you'd like your trainer to know (goals, concerns, preferences, questions).", 
-                      left_m + 8, y + 13, content_w - 16, fontsize=6.8, line_height=8.0)
+    draw_wrapped_text(p, "Tell us anything else you'd like us to know.", 
+                      left_m + 8, y + 13, content_w - 16, fontsize=7.0, line_height=8.0)
     y += th_notes_h
 
     notes_box_h = 150.0
