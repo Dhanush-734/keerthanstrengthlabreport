@@ -551,6 +551,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const isTarget = t.getAttribute('data-page') === String(activePreviewPage);
       t.classList.toggle('active', isTarget);
       t.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+      if (isTarget && typeof t.scrollIntoView === 'function') {
+        try {
+          t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } catch (err) {
+          t.scrollIntoView(false);
+        }
+      }
     });
 
     const allImgs = [previewImg1, previewImg2, previewImg3, previewImg4];

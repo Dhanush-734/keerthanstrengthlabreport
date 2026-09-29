@@ -3145,16 +3145,22 @@ body {
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 16px 24px;
   border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   background: var(--bg-darkest, #07090D);
   z-index: 10;
+  gap: 16px;
 }
 
 [data-theme="light"] .modal-dialog-preview .modal-header {
   background: #F8FAFC;
   border-bottom-color: #E2E8F0;
+}
+
+.modal-title-group {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .modal-title {
@@ -3183,8 +3189,15 @@ body {
   cursor: pointer;
   line-height: 1;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  touch-action: manipulation;
 }
 
 .btn-close-modal:hover {
@@ -3422,36 +3435,254 @@ body {
   border-top-color: #E2E8F0;
 }
 
-/* Responsive adjustments */
+/* ==========================================================================
+   OFFICIAL PDF PREVIEW MODAL — FULL MOBILE RESPONSIVE SUITE
+   Breakpoints: 320px, 375px, 390px, 414px, 430px, 768px, 1024px+
+   ========================================================================== */
+
 @media (max-width: 768px) {
+  /* 1. Mobile Modal Backdrop & Shell */
+  .modal-backdrop {
+    padding: 8px 6px;
+    align-items: center;
+    justify-content: center;
+  }
+
   .modal-dialog.modal-dialog-preview {
-    width: 98vw;
-    max-width: 98vw;
-    height: 96vh;
-    max-height: 96vh;
+    width: 100%;
+    max-width: 100%;
+    height: 98vh;
+    height: 98dvh;
+    max-height: 98dvh;
+    border-radius: 12px;
+    margin: 0 auto;
+    border: 1px solid var(--border-gold, rgba(230, 186, 85, 0.4));
+    overflow: hidden;
+  }
+
+  /* 2. Mobile Top Header */
+  .modal-dialog-preview .modal-header {
+    padding: 12px 14px 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .modal-title-group {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 4px;
+  }
+
+  .modal-title {
+    font-size: 1.05rem;
+    line-height: 1.25;
+    letter-spacing: 0.3px;
+    margin: 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .modal-subtitle {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    margin-top: 4px;
+    color: var(--text-muted);
+    white-space: normal;
+  }
+
+  .btn-close-modal {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1.75rem;
+    line-height: 1;
     border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    touch-action: manipulation;
+    cursor: pointer;
   }
-  .modal-dialog-preview .modal-header,
-  .modal-dialog-preview .modal-footer {
-    padding: 12px 16px;
+
+  .btn-close-modal:hover,
+  .btn-close-modal:active {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.12);
   }
+
+  /* 3. Horizontally Scrollable Page Tabs Bar */
   .preview-tabs-bar {
     padding: 8px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    flex-shrink: 0;
   }
+
+  .preview-tabs-bar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari touch swipe bar */
+  }
+
   .preview-tabs {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: max-content;
+    min-width: 100%;
+    padding: 2px 0;
   }
+
   .preview-tabs .btn-tab {
-    padding: 7px 8px;
-    font-size: 0.72rem;
+    flex: 0 0 auto;
+    min-height: 44px; /* Minimum 44px touch target */
+    padding: 10px 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
   }
+
+  .preview-tabs .btn-tab.active {
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(230, 186, 85, 0.35);
+  }
+
+  /* 4. Single-Scroll Vertically Scrollable PDF Stage */
   .preview-scroll-area {
-    padding: 14px 8px;
+    padding: 12px 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  .preview-img {
+
+  .preview-stage {
+    width: 100%;
     max-width: 100%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .preview-img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    aspect-ratio: 210 / 297;
+    margin: 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
+  }
+
+  /* 5. Mobile Fixed Action Footer */
+  .modal-dialog-preview .modal-footer {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .modal-dialog-preview .modal-footer .btn {
+    min-height: 44px; /* Touch target */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    touch-action: manipulation;
+  }
+
+  .modal-dialog-preview .modal-footer #btnClosePreviewBottom {
+    flex: 1 1 35%;
+  }
+
+  .modal-dialog-preview .modal-footer #btnDownloadFromModal {
+    flex: 2 1 65%;
+  }
+}
+
+/* Extra Compact Phones: 320px - 360px */
+@media (max-width: 360px) {
+  .modal-backdrop {
+    padding: 4px;
+  }
+
+  .modal-dialog.modal-dialog-preview {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 8px;
+  }
+
+  .modal-dialog-preview .modal-header {
+    padding: 10px 10px 8px 10px;
+    gap: 8px;
+  }
+
+  .modal-title {
+    font-size: 0.95rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.68rem;
+  }
+
+  .btn-close-modal {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .preview-tabs-bar {
+    padding: 6px 8px;
+  }
+
+  .preview-tabs .btn-tab {
+    padding: 8px 12px;
+    font-size: 0.74rem;
+  }
+
+  .preview-scroll-area {
+    padding: 10px 4px;
+  }
+
+  .modal-dialog-preview .modal-footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .modal-dialog-preview .modal-footer .btn {
+    width: 100%;
+    flex: 1 1 auto !important;
   }
 }
 
