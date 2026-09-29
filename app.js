@@ -273,9 +273,18 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     };
 
+    const clearSigInvalidState = () => {
+      if (drawSigBox) drawSigBox.classList.remove('sig-invalid');
+      const sigPanel = document.getElementById('signaturePanel');
+      if (sigPanel) sigPanel.classList.remove('sig-invalid');
+      const typedSigEl = document.getElementById('client_signature');
+      if (typedSigEl) typedSigEl.classList.remove('sig-invalid');
+    };
+
     const startDrawing = (e) => {
       isDrawing = true;
       hasDrawn = true;
+      clearSigInvalidState();
       const { x, y } = getCanvasCoords(e);
       sigCtx.beginPath();
       sigCtx.moveTo(x, y);
@@ -317,12 +326,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const typedSigInput = document.getElementById('client_signature');
+  if (typedSigInput) {
+    typedSigInput.addEventListener('input', () => {
+      typedSigInput.classList.remove('sig-invalid');
+      const sigPanel = document.getElementById('signaturePanel');
+      if (sigPanel) sigPanel.classList.remove('sig-invalid');
+      updateProgress();
+    });
+  }
+
   if (tabDrawSig && tabTypeSig) {
     tabDrawSig.addEventListener('click', () => {
       tabDrawSig.classList.add('active');
       tabTypeSig.classList.remove('active');
       if (drawSigBox) drawSigBox.classList.remove('hidden');
       if (typeSigBox) typeSigBox.classList.add('hidden');
+      if (drawSigBox) drawSigBox.classList.remove('sig-invalid');
+      updateProgress();
     });
 
     tabTypeSig.addEventListener('click', () => {
@@ -330,6 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tabDrawSig.classList.remove('active');
       if (typeSigBox) typeSigBox.classList.remove('hidden');
       if (drawSigBox) drawSigBox.classList.add('hidden');
+      if (typedSigInput) typedSigInput.classList.remove('sig-invalid');
+      updateProgress();
     });
   }
 
@@ -418,12 +441,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Signature data
     const isDraw = tabDrawSig && tabDrawSig.classList.contains('active');
+    const typedSig = document.getElementById('client_signature') ? document.getElementById('client_signature').value.trim() : '';
+
     if (isDraw && hasDrawn) {
-      data.client_signature_image = sigImageInput ? sigImageInput.value : (sigCanvas ? sigCanvas.toDataURL('image/png') : '');
+      data.client_signature_image = sigImageInput && sigImageInput.value ? sigImageInput.value : (sigCanvas ? sigCanvas.toDataURL('image/png') : '');
+      data.client_signature = '';
+    } else if (typedSig) {
+      data.client_signature = typedSig;
+      data.client_signature_image = '';
+    } else if (hasDrawn) {
+      data.client_signature_image = sigImageInput && sigImageInput.value ? sigImageInput.value : (sigCanvas ? sigCanvas.toDataURL('image/png') : '');
       data.client_signature = '';
     } else {
-      const typedSig = document.getElementById('client_signature') ? document.getElementById('client_signature').value.trim() : '';
-      data.client_signature = typedSig || clientName;
+      data.client_signature = '';
       data.client_signature_image = '';
     }
 
@@ -745,8 +775,43 @@ document.addEventListener('DOMContentLoaded', () => {
   async function downloadPDF() {
     const data = getFormDataObject();
     if (!data.client_name) {
+      if (previewModal && previewModal.classList.contains('show')) {
+        closeLivePreview();
+      }
       showToast('Please enter the Client Name before exporting', 'error');
-      if (clientNameInput) clientNameInput.focus();
+      if (clientNameInput) {
+        clientNameInput.focus();
+        clientNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    const hasSignature = Boolean(
+      (data.client_signature_image && data.client_signature_image.length > 50) ||
+      (data.client_signature && data.client_signature.trim().length > 0)
+    );
+
+    if (!hasSignature) {
+      if (previewModal && previewModal.classList.contains('show')) {
+        closeLivePreview();
+      }
+      showToast('Signature is mandatory. Please draw your signature or type your legal name.', 'error');
+      const sigPanel = document.getElementById('signaturePanel') || document.getElementById('sec-parq');
+      if (sigPanel) {
+        sigPanel.classList.add('sig-invalid');
+        sigPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      const isTyped = tabTypeSig && tabTypeSig.classList.contains('active');
+      if (isTyped) {
+        const typedInput = document.getElementById('client_signature');
+        if (typedInput) {
+          typedInput.classList.add('sig-invalid');
+          typedInput.focus();
+        }
+      } else {
+        const drawBox = document.getElementById('drawSigBox');
+        if (drawBox) drawBox.classList.add('sig-invalid');
+      }
       return;
     }
 

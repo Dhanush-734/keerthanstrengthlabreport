@@ -528,8 +528,8 @@
 
 
             <!-- Signature Pad & Legal Consent -->
-            <div class="panel-box mt-4">
-              <div class="panel-header">Client Consent & Digital Signature</div>
+            <div class="panel-box mt-4" id="signaturePanel">
+              <div class="panel-header">Client Consent & Digital Signature <span class="required-star">*</span></div>
               <p class="signature-legal-notice">
                 I have read, understood and completed this questionnaire honestly and accurately. Any questions I had were answered to my full satisfaction. I understand that physical exercise involves inherent risks and hereby confirm my readiness to proceed.
               </p>
@@ -556,7 +556,7 @@
               <!-- Typed Mode -->
               <div id="typeSigBox" class="signature-type-container hidden">
                 <div class="form-group">
-                  <label for="client_signature" class="form-label">Type Legal Name to Sign</label>
+                  <label for="client_signature" class="form-label">Type Legal Name to Sign <span class="required-star">*</span></label>
                   <input type="text" id="client_signature" name="client_signature" class="form-control sig-typed-input">
                 </div>
               </div>

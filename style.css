@@ -1332,6 +1332,15 @@ body {
   border-radius: 4px;
   cursor: crosshair;
   touch-action: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signature-canvas.sig-invalid,
+.signature-canvas-container.sig-invalid .signature-canvas,
+.signature-type-container input.sig-invalid,
+.panel-box.sig-invalid {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35) !important;
 }
 
 .canvas-hint {
