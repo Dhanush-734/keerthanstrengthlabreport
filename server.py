@@ -14,90 +14,73 @@ def index():
 
 @app.route('/api/health')
 def health():
-    return jsonify({'status': 'ok', 'service': 'Keerthan Strength Lab Screening API'})
+    return jsonify({'status': 'ok', 'service': 'Keerthan Strength Lab Screening & Assessment API'})
 
 @app.route('/api/sample-data')
 def get_sample_data():
     sample = {
-        'full_name': 'Johnathan Miller',
-        'age': '29',
-        'gender': 'Male',
-        'phone': '+1 (555) 234-5678',
-        'email': 'johnathan.m@example.com',
-        'occupation': 'Software Architect',
-        'date_of_assessment': '26/09/2026',
-        'training_experience': '3 years strength training',
-        'preferred_training_time': '6:30 AM - 7:30 AM',
+        # Section 1: Client Screening Form (Learner to complete with client)
+        'learner_name': 'Keerthan (Master Trainer)',
+        'screening_date': '27/09/2026',
+        'client_name': 'Alex Morgan',
+        'full_name': 'Alex Morgan',
+        'gender': 'Female',
+        'height': '168 cm',
+        'weight': '64 kg',
+        'age': '28',
+        'health_risk_factors': 'No major cardiovascular risks. Occasional lower back tightness after prolonged desk sitting.',
+        'medical_history': 'Sprained right ankle during college track in 2021 (fully rehabilitated). No surgical history.',
+        'medications': 'Daily multivitamin, Omega-3 fish oil, Vitamin D3.',
+        'occupation': 'Senior UX Designer (Desk-bound, 8 hrs/day)',
+        'time_availability': '3 to 4 days/week, weekday mornings (6:30 AM - 7:45 AM)',
+        'lifestyle_summary': 'Balanced Mediterranean whole food diet, 7-8 hours sleep per night. Tracks 2.5L water intake daily. Non-smoker.',
+        'activity_level': 'MEDIUM',
+        'training_history': '2 years recreational Pilates and dumbbell workouts at home. Wants structured barbell & hypertrophy programming.',
+        'exercise_contraindications': 'Avoid heavy unguided spinal loading initially; focus on core engagement and glute activation.',
+        'exercise_likes': 'Squats, deadlifts, kettlebell swings, rowing machine, mobility flows.',
+        'exercise_dislikes': 'Long steady-state treadmill running, burpees, heavy overhead military presses.',
+
+        # Section 2: PAR-Q (Client to complete)
+        'parq_client_name': 'Alex Morgan',
+        'parq_date': '27/09/2026',
         'parq_q1': 'no',
         'parq_q2': 'no',
         'parq_q3': 'no',
-        'parq_q4': 'yes',
+        'parq_q4': 'no',
         'parq_q5': 'no',
         'parq_q6': 'no',
         'parq_q7': 'no',
-        'parq_details_1': 'Mild left rotator cuff impingement in 2024.',
-        'parq_details_2': 'Cleared by physiotherapist; needs proper warm-up.',
-        'current_medical_conditions': 'None',
-        'previous_injuries': 'Left shoulder strain (2024)',
-        'surgeries': 'None',
-        'current_medications': 'Multivitamin, Omega-3',
-        'pain_discomfort': 'Occasional shoulder stiffness',
-        'other_health_concerns': 'None reported',
-        'medical_additional_details_1': 'Underwent 6 weeks of rehabilitation with full range of motion regained.',
-        'medical_additional_details_2': 'Advised to emphasize rotator cuff warm-up before heavy pressing.',
-        'average_sleep': '7.5',
-        'daily_water': '3.0',
-        'daily_steps_activity': '9,000 steps',
-        'current_exercise': 'Resistance training',
-        'exercise_frequency': '4 days',
-        'typical_work_activity': 'Desk job / Sedentary',
-        'smoking': 'no',
-        'alcohol': 'yes',
-        'stress': 'moderate',
-        'dietary_preferences_1': 'High-protein whole foods diet; moderate carbohydrates.',
-        'dietary_preferences_2': 'No food allergies; tracking macros with 160g protein target.',
-        'height': '182',
-        'weight': '84.5',
-        'bmi': '25.5',
-        'resting_heart_rate': '62',
-        'bp_systolic': '118',
-        'bp_diastolic': '76',
-        'body_assessment_date': '26/09/2026',
-        'waist': '86',
-        'hip': '101',
-        'chest': '104',
-        'arm': '37.5',
-        'thigh': '59',
-        'other_measurement': 'Calf: 38',
-        'cardio_test': '1.5-mile run',
-        'cardio_result': '10 min 45 sec',
-        'cardio_date': '26/09/2026',
-        'pushups_test': 'Standard floor push-ups',
-        'pushups_result': '38 reps',
-        'pushups_notes': 'Solid form, good lockout',
-        'squat_test': 'Overhead squat assessment',
-        'squat_result': 'Score: 3/3',
-        'squat_notes': 'Great depth and ankle mobility',
-        'plank_test': 'Prone forearm plank',
-        'plank_result': '2 min 15 sec',
-        'plank_notes': 'Strong core stability',
-        'flexibility_test': 'Sit and reach / shoulder pass',
-        'flexibility_result': '+4 cm / Full pass',
-        'flexibility_notes': 'Good thoracic spine mobility',
-        'fitness_observations_1': 'Excellent base conditioning, eager to progress to heavy barbell cycles.',
-        'fitness_observations_2': 'Slight left shoulder asymmetry to monitor during overhead pressing.',
-        'primary_goal': 'Hypertrophy & Strength',
-        'target_weight': '82',
-        'target_date': '26/03/2027',
-        'secondary_goal': 'Lower body fat to 12%',
-        'training_days_per_week': '4',
-        'preferred_activities': 'Barbell lifts, HIIT',
-        'specific_goals_1': 'Achieve 140kg squat, 100kg bench press, and 180kg deadlift.',
-        'specific_goals_2': 'Improve overall cardiovascular stamina and athletic power output.',
-        'client_signature': 'Johnathan Miller',
-        'client_signature_date': '26/09/2026',
-        'trainer_signature': '',
-        'trainer_signature_date': ''
+        'parq_q8': 'no',
+        'parq_q9': 'no',
+        'parq_q10': 'no',
+        'client_signature': 'Alex Morgan',
+        'client_signature_date': '27/09/2026',
+        'parq_signature_date': '27/09/2026',
+
+        # Section 3: 4. Initial Assessment (Learner to complete - in lab by trainer)
+        'assessment_client_name': 'Alex Morgan',
+        'instructor_name': 'Keerthan',
+        'assessment_date': '27/09/2026',
+        'chosen_tests': ['digital', 'bmi', 'waist circumference', 'bio-electrical impedance', 'press up', 'rockport walking test', 'hamstrings', 'shoulders'],
+        'bp_results': '116/74 mmHg (Resting HR: 62 bpm)',
+        'bp_reasons': 'Routine baseline assessment before high-intensity resistance.',
+        'anthro_results': 'BMI: 22.7 (Normal weight) | Waist: 70 cm | WHR: 0.74',
+        'anthro_reasons': 'Standard body composition metrics to gauge progress over 12 weeks.',
+        'body_comp_results': 'Body Fat: 21.4% (via bio-electrical impedance scan)',
+        'body_comp_reasons': 'Selected bio-electrical impedance for non-invasive speed and comfort.',
+        'muscular_results': 'Push-ups: 22 reps | Plank: 1 min 45 sec | Goblet Squat: 20kg x 12 reps',
+        'muscular_reasons': 'Baseline muscular endurance and core stability screen.',
+        'cardio_results': 'Rockport Walking Test: Estimated VO2max 41.2 ml/kg/min (Good)',
+        'cardio_reasons': 'Low impact walking test chosen due to previous ankle history.',
+        'rom_results': 'Hamstrings: Normal (85 deg) | Shoulder Flexion: Full ROM (180 deg) | Ankle Dorsiflexion: Symmetrical 35 deg',
+        'rom_reasons': 'Screening mobility for safe squat and deadlift mechanics.',
+        'posture_results': 'Slight anterior pelvic tilt and forward head posture from computer work. Knees tracking neutral.',
+        'posture_reasons': 'Crucial for tailoring corrective warm-up and posterior chain volume.',
+
+        # Section 4: Client's Barriers to Exercise
+        'exercise_barriers': 'High workload deadlines during sprint weeks. Afternoon fatigue and lack of accountability when training alone.',
+        'overcome_strategies': 'Schedule fixed morning training slots before work. Pre-pack gym bag evening prior. Shared weekly check-ins with trainer.',
+        'attitude_motivation_summary': 'Highly driven and goal-oriented. Motivated by physical strength gains, better posture, and energy levels for demanding tech career.'
     }
     return jsonify(sample)
 
@@ -116,8 +99,8 @@ def generate_pdf_endpoint():
         data = request.get_json(force=True) or {}
         pdf_bytes = generate_screening_pdf(data)
         
-        client_name = data.get('full_name', 'Client').strip().replace(' ', '_')
-        filename = f"Keerthan_Strength_Lab_Screening_{client_name}.pdf"
+        client_name = data.get('client_name', data.get('full_name', 'Client')).strip().replace(' ', '_')
+        filename = f"Keerthan_Strength_Lab_Assessment_{client_name}.pdf"
         
         return send_file(
             io.BytesIO(pdf_bytes),

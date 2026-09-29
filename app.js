@@ -1,35 +1,63 @@
 /**
- * KEERTHAN STRENGTH LAB - Client Screening & Assessment Portal
- * Complete Logic for Form Interactions, Dark/Light Theme, BMI Calculation,
- * Touch-Friendly Mobile Signature, High-Resolution Live Preview, and PDF Generation
+ * KEERTHAN STRENGTH LAB - 4-Stage Assessment Dossier Portal
+ * Logic for:
+ * 1. Client Screening Intake & Demographics
+ * 2. 10-Question PAR-Q Safety Screener & Physician Alerts
+ * 3. Exercise Barriers & Adherence Strategies
+ * 4. Initial Assessment Record with Interactive Test Selector Chips (Min 3 required)
+ * 5. Digital Touch/Mouse Signature Pad & Typed Fallback
+ * 6. Live BMI Calculator & Cross-Section Data Synchronization
+ * 7. 4-Page Live Vector PDF Preview Modal
+ * 8. Server-Side & Offline Client-Side PDF Generation
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+
   // ----------------------------------------------------
   // DOM Elements
   // ----------------------------------------------------
   const form = document.getElementById('screeningForm');
+  const clientNameInput = document.getElementById('client_name');
+  const parqClientNameInput = document.getElementById('parq_client_name');
+  const assessClientNameInput = document.getElementById('assessment_client_name');
+
+  const learnerNameInput = document.getElementById('learner_name');
+  const instructorNameInput = document.getElementById('instructor_name');
+
+  const screeningDateInput = document.getElementById('screening_date');
+  const parqDateInput = document.getElementById('parq_date');
+  const assessDateInput = document.getElementById('assessment_date');
+  const clientSigDateInput = document.getElementById('client_signature_date');
+
   const heightInput = document.getElementById('height');
   const weightInput = document.getElementById('weight');
-  const bmiInput = document.getElementById('bmi');
+  const bmiDisplay = document.getElementById('bmiDisplay');
   const bmiBadge = document.getElementById('bmiBadge');
-  const parqBadge = document.getElementById('parqBadge');
-  const parqStatusText = document.getElementById('parqStatusText');
+  const anthroResultsInput = document.getElementById('anthro_results');
+
+  // Status Badges
   const progressFill = document.getElementById('progressFill');
   const progressPercent = document.getElementById('progressPercent');
-
-  // Theme Elements
-  const themeToggle = document.getElementById('themeToggle');
-  const themeLabel = document.getElementById('themeLabel');
-  const fabThemeToggle = document.getElementById('fabThemeToggle');
-  const fabThemeIcon = document.getElementById('fabThemeIcon');
-
-  // Fast-Intake Banner Status Elements
-  const statusItemName = document.getElementById('statusItemName');
+  const statusItemClient = document.getElementById('statusItemClient');
+  const statusItemParq = document.getElementById('statusItemParq');
+  const statusItemTests = document.getElementById('statusItemTests');
   const statusItemSig = document.getElementById('statusItemSig');
-  const statusItemOpt = document.getElementById('statusItemOpt');
+  const chosenTestsCount = document.getElementById('chosenTestsCount');
+
+  // PAR-Q Banner Elements
+  const parqStatusBanner = document.getElementById('parqStatusBanner');
+  const parqIcon = document.getElementById('parqIcon');
+  const parqTitle = document.getElementById('parqTitle');
+  const parqSubtitle = document.getElementById('parqSubtitle');
+
+  // Test Selection Elements
+  const testChips = document.querySelectorAll('.test-chip');
+  const chosenTestsInput = document.getElementById('chosen_tests');
+  const testSelectionBadge = document.getElementById('testSelectionBadge');
+  const badgeCountDisplay = document.getElementById('badgeCountDisplay');
 
   // Action Buttons
+  const btnSampleData = document.getElementById('btnSampleData');
   const btnResetForm = document.getElementById('btnResetForm');
   const btnOpenPreview = document.getElementById('btnOpenPreview');
   const btnPreviewBottom = document.getElementById('btnPreviewBottom');
@@ -38,7 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const fabPreview = document.getElementById('fabPreview');
   const fabDownload = document.getElementById('fabDownload');
 
-  // Modal Elements
+  // Theme Elements
+  const themeToggle = document.getElementById('themeToggle');
+  const themeLabel = document.getElementById('themeLabel');
+  const fabThemeToggle = document.getElementById('fabThemeToggle');
+  const fabThemeIcon = document.getElementById('fabThemeIcon');
+
+  // 4-Page Preview Modal Elements
   const previewModal = document.getElementById('previewModal');
   const btnClosePreview = document.getElementById('btnClosePreview');
   const btnClosePreviewBottom = document.getElementById('btnClosePreviewBottom');
@@ -47,6 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewStage = document.getElementById('previewStage');
   const previewImg1 = document.getElementById('previewImg1');
   const previewImg2 = document.getElementById('previewImg2');
+  const previewImg3 = document.getElementById('previewImg3');
+  const previewImg4 = document.getElementById('previewImg4');
   const previewTabs = document.querySelectorAll('.preview-tabs .btn-tab');
 
   // Signature Elements
@@ -57,195 +93,78 @@ document.addEventListener('DOMContentLoaded', () => {
   const drawSigBox = document.getElementById('drawSigBox');
   const typeSigBox = document.getElementById('typeSigBox');
   const sigImageInput = document.getElementById('client_signature_image');
-  const consentAgreed = document.getElementById('consent_agreed');
 
-  // Default Today's Date
+  // Initialize Today's Date
   const today = new Date();
-  const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-
-  const dateFields = [
-    'date_of_assessment',
-    'body_assessment_date',
-    'cardio_date',
-    'client_signature_date'
-  ];
-  dateFields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el && !el.value) el.value = formattedDate;
+  const formattedToday = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+  [screeningDateInput, parqDateInput, assessDateInput, clientSigDateInput].forEach(el => {
+    if (el && !el.value) el.value = formattedToday;
   });
 
-  // Signature Canvas Context (declared early to prevent TDZ in applyTheme)
-  let isDrawing = false;
-  let hasDrawn = false;
-  const ctx = sigCanvas ? sigCanvas.getContext('2d') : null;
-
   // ----------------------------------------------------
-  // 1. THEME SWITCHER (Dark & Light Mode)
+  // 1. THEME MANAGEMENT
   // ----------------------------------------------------
   function getPreferredTheme() {
-    const saved = localStorage.getItem('ksl_theme');
-    if (saved) return saved;
-    return 'dark'; // Luxury obsidian dark by default
+    return localStorage.getItem('ksl_theme') || 'dark';
   }
 
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('ksl_theme', theme);
 
-    if (themeLabel) {
-      themeLabel.textContent = theme === 'light' ? 'Light' : 'Dark';
-    }
-    if (fabThemeIcon) {
-      fabThemeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
-    }
+    if (themeLabel) themeLabel.textContent = theme === 'light' ? 'Light' : 'Dark';
+    if (fabThemeIcon) fabThemeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
 
-    // Refresh signature canvas pen color if blank
-    if (sigCanvas && ctx) {
+    if (sigCanvas) {
+      const ctx = sigCanvas.getContext('2d');
       ctx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
     }
   }
 
-  const currentTheme = getPreferredTheme();
-  applyTheme(currentTheme);
+  applyTheme(getPreferredTheme());
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
       const active = document.documentElement.getAttribute('data-theme') || 'dark';
-      applyTheme(active === 'dark' ? 'light' : 'dark');
-      showToast(`Switched to ${active === 'dark' ? 'Light' : 'Dark'} Mode`, 'info');
+      const target = active === 'dark' ? 'light' : 'dark';
+      applyTheme(target);
+      showToast(`Switched to ${target === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
     });
   }
 
   if (fabThemeToggle) {
     fabThemeToggle.addEventListener('click', () => {
       const active = document.documentElement.getAttribute('data-theme') || 'dark';
-      applyTheme(active === 'dark' ? 'light' : 'dark');
-      showToast(`Switched to ${active === 'dark' ? 'Light' : 'Dark'} Mode`, 'info');
+      const target = active === 'dark' ? 'light' : 'dark';
+      applyTheme(target);
+      showToast(`Switched to ${target === 'light' ? 'Light' : 'Dark'} Mode`, 'info');
     });
   }
 
   // ----------------------------------------------------
-  // 2. MOBILE TOUCH-FRIENDLY SIGNATURE CANVAS
+  // 2. DATA SYNCHRONIZATION ACROSS SECTIONS
   // ----------------------------------------------------
-
-  function resizeCanvas() {
-    if (!sigCanvas || !ctx) return;
-    const rect = sigCanvas.getBoundingClientRect();
-    if (rect.width > 0 && sigCanvas.width !== Math.round(rect.width)) {
-      let temp = null;
-      if (hasDrawn && sigCanvas.width > 0 && sigCanvas.height > 0) {
-        temp = ctx.getImageData(0, 0, sigCanvas.width, sigCanvas.height);
-      }
-      sigCanvas.width = Math.round(rect.width);
-      sigCanvas.height = 140;
-
-      const theme = document.documentElement.getAttribute('data-theme');
-      ctx.lineWidth = 2.8;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
-
-      if (temp) {
-        ctx.putImageData(temp, 0, 0);
-      }
-    }
-  }
-
-  window.addEventListener('resize', resizeCanvas);
-  setTimeout(resizeCanvas, 80);
-
-  function getCanvasCoords(e) {
-    const rect = sigCanvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e);
-    const clientX = touch.clientX;
-    const clientY = touch.clientY;
-    return {
-      x: (clientX - rect.left) * (sigCanvas.width / rect.width),
-      y: (clientY - rect.top) * (sigCanvas.height / rect.height)
-    };
-  }
-
-  function startDrawing(e) {
-    if (e.cancelable) e.preventDefault();
-    isDrawing = true;
-    hasDrawn = true;
-    const theme = document.documentElement.getAttribute('data-theme');
-    ctx.lineWidth = 2.8;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
-
-    const { x, y } = getCanvasCoords(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  }
-
-  function draw(e) {
-    if (!isDrawing) return;
-    if (e.cancelable) e.preventDefault();
-    const { x, y } = getCanvasCoords(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
-
-  function stopDrawing(e) {
-    if (!isDrawing) return;
-    isDrawing = false;
-    ctx.closePath();
-    updateSignatureData();
-    updateRequirementsStatus();
-    updateProgress();
-  }
-
-  function updateSignatureData() {
-    if (hasDrawn && sigCanvas) {
-      sigImageInput.value = sigCanvas.toDataURL('image/png');
-    } else {
-      sigImageInput.value = '';
-    }
-  }
-
-  if (sigCanvas) {
-    // Mouse events
-    sigCanvas.addEventListener('mousedown', startDrawing);
-    sigCanvas.addEventListener('mousemove', draw);
-    window.addEventListener('mouseup', stopDrawing);
-
-    // Touch events for mobile phones and tablets
-    sigCanvas.addEventListener('touchstart', startDrawing, { passive: false });
-    sigCanvas.addEventListener('touchmove', draw, { passive: false });
-    window.addEventListener('touchend', stopDrawing);
-    window.addEventListener('touchcancel', stopDrawing);
-
-    if (btnClearSig) {
-      btnClearSig.addEventListener('click', () => {
-        ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-        hasDrawn = false;
-        sigImageInput.value = '';
-        updateRequirementsStatus();
-        updateProgress();
-        showToast('Signature cleared', 'info');
-      });
-    }
-  }
-
-  // Signature Mode Switching (Draw vs Type)
-  if (tabDrawSig && tabTypeSig) {
-    tabDrawSig.addEventListener('click', () => {
-      tabDrawSig.classList.add('active');
-      tabTypeSig.classList.remove('active');
-      drawSigBox.classList.remove('hidden');
-      typeSigBox.classList.add('hidden');
-      resizeCanvas();
-      updateRequirementsStatus();
+  if (clientNameInput) {
+    clientNameInput.addEventListener('input', () => {
+      const name = clientNameInput.value.trim();
+      if (parqClientNameInput) parqClientNameInput.value = name;
+      if (assessClientNameInput) assessClientNameInput.value = name;
+      updateProgress();
     });
+  }
 
-    tabTypeSig.addEventListener('click', () => {
-      tabTypeSig.classList.add('active');
-      tabDrawSig.classList.remove('active');
-      typeSigBox.classList.remove('hidden');
-      drawSigBox.classList.add('hidden');
-      updateRequirementsStatus();
+  if (learnerNameInput) {
+    learnerNameInput.addEventListener('input', () => {
+      if (instructorNameInput) instructorNameInput.value = learnerNameInput.value.trim();
+    });
+  }
+
+  if (screeningDateInput) {
+    screeningDateInput.addEventListener('input', () => {
+      const d = screeningDateInput.value.trim();
+      if (parqDateInput) parqDateInput.value = d;
+      if (assessDateInput) assessDateInput.value = d;
+      if (clientSigDateInput) clientSigDateInput.value = d;
     });
   }
 
@@ -253,36 +172,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. BMI AUTO-CALCULATOR
   // ----------------------------------------------------
   function calculateBMI() {
-    const h = parseFloat(heightInput.value);
-    const w = parseFloat(weightInput.value);
+    if (!heightInput || !weightInput) return;
+    const hRaw = parseFloat(heightInput.value.replace(/[^\d.]/g, ''));
+    const wRaw = parseFloat(weightInput.value.replace(/[^\d.]/g, ''));
 
-    if (h > 50 && w > 20) {
-      const hM = h / 100;
-      const bmi = (w / (hM * hM)).toFixed(1);
-      bmiInput.value = bmi;
+    if (hRaw > 50 && wRaw > 20) {
+      const hM = hRaw / 100.0;
+      const bmi = (wRaw / (hM * hM)).toFixed(1);
+      if (bmiDisplay) bmiDisplay.textContent = bmi;
 
+      let category = 'Normal';
+      let badgeClass = 'badge-bmi bmi-normal';
       if (bmi < 18.5) {
-        bmiBadge.textContent = 'Underweight';
-        bmiBadge.style.color = '#38BDF8';
-        bmiBadge.style.borderColor = '#38BDF8';
+        category = 'Underweight';
+        badgeClass = 'badge-bmi';
       } else if (bmi < 25.0) {
-        bmiBadge.textContent = 'Normal';
-        bmiBadge.style.color = '#10B981';
-        bmiBadge.style.borderColor = '#10B981';
+        category = 'Normal Weight';
+        badgeClass = 'badge-bmi bmi-normal';
       } else if (bmi < 30.0) {
-        bmiBadge.textContent = 'Overweight';
-        bmiBadge.style.color = '#F59E0B';
-        bmiBadge.style.borderColor = '#F59E0B';
+        category = 'Overweight';
+        badgeClass = 'badge-bmi bmi-overweight';
       } else {
-        bmiBadge.textContent = 'Obese';
-        bmiBadge.style.color = '#EF4444';
-        bmiBadge.style.borderColor = '#EF4444';
+        category = 'Obese';
+        badgeClass = 'badge-bmi bmi-obese';
+      }
+
+      if (bmiBadge) {
+        bmiBadge.className = badgeClass;
+        bmiBadge.textContent = category;
+      }
+
+      // Auto-suggest in anthropometrics if empty
+      if (anthroResultsInput && (!anthroResultsInput.value || anthroResultsInput.value.startsWith('BMI:'))) {
+        anthroResultsInput.value = `BMI: ${bmi} (${category})`;
       }
     } else {
-      bmiInput.value = '';
-      bmiBadge.textContent = 'Auto';
-      bmiBadge.style.color = '';
-      bmiBadge.style.borderColor = '';
+      if (bmiDisplay) bmiDisplay.textContent = '--';
+      if (bmiBadge) {
+        bmiBadge.className = 'badge-bmi';
+        bmiBadge.textContent = 'Awaiting height & weight';
+      }
     }
   }
 
@@ -290,120 +219,254 @@ document.addEventListener('DOMContentLoaded', () => {
   if (weightInput) weightInput.addEventListener('input', calculateBMI);
 
   // ----------------------------------------------------
-  // 4. PAR-Q STATUS MONITOR
+  // 4. PAR-Q SAFETY CHECKER
   // ----------------------------------------------------
   function checkPARQStatus() {
-    const parqRadios = form.querySelectorAll('input[name^="parq_q"]:checked');
-    let hasYes = false;
-
-    parqRadios.forEach(radio => {
-      if (radio.value === 'yes') hasYes = true;
-    });
-
-    if (hasYes) {
-      parqBadge.classList.add('alert');
-      parqStatusText.textContent = 'Medical Clearance Recommended';
-    } else {
-      parqBadge.classList.remove('alert');
-      parqStatusText.textContent = 'All Clear';
-    }
-  }
-
-  form.querySelectorAll('input[name^="parq_q"]').forEach(radio => {
-    radio.addEventListener('change', checkPARQStatus);
-  });
-
-  // ----------------------------------------------------
-  // 5. FAST-INTAKE REQUIREMENTS LIVE STATUS
-  // ----------------------------------------------------
-  function updateRequirementsStatus() {
-    const fullNameEl = document.getElementById('full_name');
-    const hasName = fullNameEl && fullNameEl.value.trim().length > 0;
-
-    // Check client signature
-    const typedSigEl = document.getElementById('client_signature');
-    const isDrawMode = tabDrawSig && tabDrawSig.classList.contains('active');
-    const hasSig = (isDrawMode && hasDrawn) ||
-                   (!isDrawMode && typedSigEl && typedSigEl.value.trim().length > 0) ||
-                   (hasName && consentAgreed && consentAgreed.checked);
-
-    // Update Name Status Pill
-    if (statusItemName) {
-      if (hasName) {
-        statusItemName.className = 'status-pill status-done';
-        statusItemName.innerHTML = '👤 Name: <em>Ready</em>';
+    let yesCount = 0;
+    for (let i = 1; i <= 10; i++) {
+      const checked = document.querySelector(`input[name="parq_q${i}"]:checked`);
+      const row = document.querySelector(`.parq-question-row:nth-child(${i})`);
+      if (checked && checked.value === 'yes') {
+        yesCount++;
+        if (row) row.classList.add('flagged');
       } else {
-        statusItemName.className = 'status-pill status-pending';
-        statusItemName.innerHTML = '👤 Name: <em>Required</em>';
+        if (row) row.classList.remove('flagged');
       }
     }
 
-    // Update Signature Status Pill
+    if (parqStatusBanner) {
+      if (yesCount > 0) {
+        parqStatusBanner.className = 'parq-status-card mb-4 warning';
+        if (parqIcon) parqIcon.textContent = '⚠️';
+        if (parqTitle) parqTitle.textContent = `MEDICAL CLEARANCE ADVISED (${yesCount} 'YES' RESPONSES)`;
+        if (parqSubtitle) parqSubtitle.textContent = 'Physician consultation or certified exercise physiologist sign-off recommended before vigorous resistance/cardio training.';
+        if (statusItemParq) {
+          statusItemParq.className = 'status-pill status-mand';
+          statusItemParq.innerHTML = `⚠️ PAR-Q: <em>${yesCount} Yes (Referral)</em>`;
+        }
+      } else {
+        parqStatusBanner.className = 'parq-status-card mb-4 safe';
+        if (parqIcon) parqIcon.textContent = '🛡️';
+        if (parqTitle) parqTitle.textContent = 'CLEARANCE: READY FOR PHYSICAL ACTIVITY';
+        if (parqSubtitle) parqSubtitle.textContent = 'All 10 questions answered NO. Client is clear to initiate structured exercise.';
+        if (statusItemParq) {
+          statusItemParq.className = 'status-pill status-done';
+          statusItemParq.innerHTML = `🛡️ PAR-Q: <em>Clear (All No)</em>`;
+        }
+      }
+    }
+    updateProgress();
+  }
+
+  const parqRadios = document.querySelectorAll('input[type="radio"][name^="parq_q"]');
+  parqRadios.forEach(radio => radio.addEventListener('change', checkPARQStatus));
+
+  // ----------------------------------------------------
+  // 5. TEST SELECTION CHIPS & TRAINER IN-LAB ASSESSMENT
+  // ----------------------------------------------------
+  function updateChosenTests() {
+    const activeChips = document.querySelectorAll('.test-chip.active');
+    const selected = [];
+    activeChips.forEach(chip => {
+      const val = chip.getAttribute('data-test');
+      if (val) selected.push(val);
+    });
+
+    if (chosenTestsInput) chosenTestsInput.value = selected.join(',');
+    const count = selected.length;
+
+    if (badgeCountDisplay) badgeCountDisplay.textContent = count > 0 ? `${count} Chosen` : `0 / 3`;
+    if (chosenTestsCount) chosenTestsCount.textContent = count > 0 ? `${count} Tests Conducted` : `Trainer In-Lab (Optional)`;
+
+    if (testSelectionBadge) {
+      if (count >= 3) {
+        testSelectionBadge.classList.add('met');
+      } else {
+        testSelectionBadge.classList.remove('met');
+      }
+    }
+
+    updateProgress();
+  }
+
+  testChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('active');
+      updateChosenTests();
+    });
+  });
+
+  // ----------------------------------------------------
+  // 6. TOUCH / MOUSE SIGNATURE PAD
+  // ----------------------------------------------------
+  let isDrawing = false;
+  let hasDrawn = false;
+  const sigCtx = sigCanvas ? sigCanvas.getContext('2d') : null;
+
+  function resizeCanvas() {
+    if (!sigCanvas || !sigCtx) return;
+    const rect = sigCanvas.getBoundingClientRect();
+    if (rect.width > 0 && sigCanvas.width !== Math.round(rect.width)) {
+      let temp = null;
+      if (hasDrawn && sigCanvas.width > 0 && sigCanvas.height > 0) {
+        temp = sigCtx.getImageData(0, 0, sigCanvas.width, sigCanvas.height);
+      }
+      sigCanvas.width = Math.round(rect.width);
+      sigCanvas.height = 130;
+
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      sigCtx.lineWidth = 2.8;
+      sigCtx.lineCap = 'round';
+      sigCtx.lineJoin = 'round';
+      sigCtx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
+
+      if (temp) sigCtx.putImageData(temp, 0, 0);
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 100);
+
+  function getCanvasCoords(e) {
+    const rect = sigCanvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e);
+    return {
+      x: (touch.clientX - rect.left) * (sigCanvas.width / rect.width),
+      y: (touch.clientY - rect.top) * (sigCanvas.height / rect.height)
+    };
+  }
+
+  if (sigCanvas && sigCtx) {
+    const startDrawing = (e) => {
+      if (e.cancelable) e.preventDefault();
+      isDrawing = true;
+      hasDrawn = true;
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      sigCtx.lineWidth = 2.8;
+      sigCtx.lineCap = 'round';
+      sigCtx.lineJoin = 'round';
+      sigCtx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
+
+      const { x, y } = getCanvasCoords(e);
+      sigCtx.beginPath();
+      sigCtx.moveTo(x, y);
+    };
+
+    const draw = (e) => {
+      if (!isDrawing) return;
+      if (e.cancelable) e.preventDefault();
+      const { x, y } = getCanvasCoords(e);
+      sigCtx.lineTo(x, y);
+      sigCtx.stroke();
+    };
+
+    const stopDrawing = (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      sigCtx.closePath();
+      if (sigImageInput) sigImageInput.value = sigCanvas.toDataURL('image/png');
+      updateProgress();
+    };
+
+    sigCanvas.addEventListener('mousedown', startDrawing);
+    sigCanvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    sigCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+    sigCanvas.addEventListener('touchmove', draw, { passive: false });
+    window.addEventListener('touchend', stopDrawing);
+  }
+
+  if (btnClearSig) {
+    btnClearSig.addEventListener('click', () => {
+      if (sigCtx && sigCanvas) {
+        sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+        hasDrawn = false;
+        if (sigImageInput) sigImageInput.value = '';
+        updateProgress();
+      }
+    });
+  }
+
+  if (tabDrawSig && tabTypeSig) {
+    tabDrawSig.addEventListener('click', () => {
+      tabDrawSig.classList.add('active');
+      tabTypeSig.classList.remove('active');
+      drawSigBox.classList.remove('hidden');
+      typeSigBox.classList.add('hidden');
+      resizeCanvas();
+    });
+
+    tabTypeSig.addEventListener('click', () => {
+      tabTypeSig.classList.add('active');
+      tabDrawSig.classList.remove('active');
+      typeSigBox.classList.remove('hidden');
+      drawSigBox.classList.add('hidden');
+      const typedSig = document.getElementById('client_signature');
+      if (typedSig && !typedSig.value && clientNameInput) {
+        typedSig.value = clientNameInput.value.trim();
+      }
+      updateProgress();
+    });
+  }
+
+  // ----------------------------------------------------
+  // 7. PROGRESS TRACKER
+  // ----------------------------------------------------
+  function updateProgress() {
+    const hasName = clientNameInput && clientNameInput.value.trim().length > 0;
+    const isDraw = tabDrawSig && tabDrawSig.classList.contains('active');
+    const typedSigEl = document.getElementById('client_signature');
+    const hasSig = (isDraw && hasDrawn) || (!isDraw && typedSigEl && typedSigEl.value.trim().length > 0);
+
+    const activeChipsCount = document.querySelectorAll('.test-chip.active').length;
+
+    // Fast-intake weights: Client Name 35%, PAR-Q 35%, Sig 30%
+    // (Initial Assessment is completed by the trainer in-lab, and is optional for intake)
+    let percent = 0;
+    if (hasName) percent += 35;
+    percent += 35; // 10 questions defaulted to NO
+    if (hasSig) percent += 30;
+
+    if (progressPercent) progressPercent.textContent = `${percent}%`;
+    if (progressFill) progressFill.style.width = `${percent}%`;
+
+    if (statusItemClient) {
+      if (hasName) {
+        statusItemClient.className = 'status-pill status-done';
+        statusItemClient.innerHTML = `👤 Client: <em>${clientNameInput.value.trim()}</em>`;
+      } else {
+        statusItemClient.className = 'status-pill status-mand';
+        statusItemClient.innerHTML = '👤 Client: <em>Required</em>';
+      }
+    }
+
     if (statusItemSig) {
       if (hasSig) {
         statusItemSig.className = 'status-pill status-done';
         statusItemSig.innerHTML = '✍️ Signature: <em>Signed</em>';
       } else {
-        statusItemSig.className = 'status-pill status-pending';
+        statusItemSig.className = 'status-pill status-mand';
         statusItemSig.innerHTML = '✍️ Signature: <em>Required</em>';
       }
     }
 
-    // Count optional fields completed
-    const optionalFields = [
-      'age', 'phone', 'email', 'occupation', 'training_experience',
-      'current_medical_conditions', 'previous_injuries', 'surgeries', 'current_medications',
-      'average_sleep', 'daily_water', 'daily_steps_activity', 'current_exercise',
-      'height', 'weight', 'resting_heart_rate', 'bp_systolic', 'bp_diastolic',
-      'waist', 'hip', 'chest', 'arm', 'thigh',
-      'cardio_result', 'pushups_result', 'squat_result', 'plank_result',
-      'primary_goal', 'target_weight', 'preferred_activities'
-    ];
-
-    let optCount = 0;
-    optionalFields.forEach(name => {
-      const el = form.elements[name];
-      if (el && el.value && el.value.trim().length > 0) optCount++;
-    });
-
-    if (statusItemOpt) {
-      if (optCount > 0) {
-        statusItemOpt.className = 'status-pill status-done';
-        statusItemOpt.innerHTML = `📊 Assessment: <em>${optCount} filled</em>`;
+    if (statusItemTests) {
+      if (activeChipsCount > 0) {
+        statusItemTests.className = 'status-pill status-done';
+        statusItemTests.innerHTML = `🎯 Initial Assessment: <em>${activeChipsCount} Tests Chosen</em>`;
       } else {
-        statusItemOpt.className = 'status-pill status-optional';
-        statusItemOpt.innerHTML = '📊 Clinical / Assessment: <em>Optional</em>';
+        statusItemTests.className = 'status-pill status-optional';
+        statusItemTests.innerHTML = `🎯 Initial Assessment: <em>Trainer In-Lab (Optional)</em>`;
       }
     }
-  }
-
-  // ----------------------------------------------------
-  // 6. PROGRESS TRACKER
-  // ----------------------------------------------------
-  function updateProgress() {
-    const fullNameEl = document.getElementById('full_name');
-    const hasName = fullNameEl && fullNameEl.value.trim().length > 0;
-
-    const isDrawMode = tabDrawSig && tabDrawSig.classList.contains('active');
-    const typedSigEl = document.getElementById('client_signature');
-    const hasSig = (isDrawMode && hasDrawn) || (!isDrawMode && typedSigEl && typedSigEl.value.trim().length > 0);
-
-    // Fast-Intake baseline: Name = 50%, Signature = 50%
-    let percent = 0;
-    if (hasName) percent += 50;
-    if (hasSig) percent += 50;
-
-    progressPercent.textContent = `${percent}%`;
-    progressFill.style.width = `${percent}%`;
-
-    updateRequirementsStatus();
   }
 
   form.addEventListener('input', updateProgress);
   form.addEventListener('change', updateProgress);
 
   // ----------------------------------------------------
-  // 7. EXTRACT FORM DATA AS OBJECT
+  // 8. EXTRACT FORM DATA AS OBJECT
   // ----------------------------------------------------
   function getFormDataObject() {
     const formData = new FormData(form);
@@ -413,68 +476,172 @@ document.addEventListener('DOMContentLoaded', () => {
       data[key] = val;
     });
 
-    // Checked radios that might not appear if untouched
-    for (let i = 1; i <= 7; i++) {
+    // PAR-Q 10 Questions
+    for (let i = 1; i <= 10; i++) {
       const qKey = `parq_q${i}`;
       const checked = form.querySelector(`input[name="${qKey}"]:checked`);
       data[qKey] = checked ? checked.value : 'no';
     }
 
-    // Gender
-    const genderChecked = form.querySelector('input[name="gender"]:checked');
-    data.gender = genderChecked ? genderChecked.value : 'Male';
+    // Client Name fallbacks
+    const clientName = (clientNameInput ? clientNameInput.value : '').trim();
+    data.client_name = clientName;
+    data.parq_client_name = clientName;
+    data.assessment_client_name = clientName;
 
-    // Smoking / Alcohol / Stress
-    const smokingChecked = form.querySelector('input[name="smoking"]:checked');
-    data.smoking = smokingChecked ? smokingChecked.value : 'no';
+    // Dates
+    const todayStr = screeningDateInput ? screeningDateInput.value.trim() : formattedToday;
+    data.screening_date = todayStr;
+    data.parq_date = todayStr;
+    data.assessment_date = todayStr;
+    data.client_signature_date = (clientSigDateInput ? clientSigDateInput.value.trim() : todayStr) || todayStr;
+    data.parq_signature_date = data.client_signature_date;
 
-    const alcoholChecked = form.querySelector('input[name="alcohol"]:checked');
-    data.alcohol = alcoholChecked ? alcoholChecked.value : 'no';
-
-    const stressChecked = form.querySelector('input[name="stress"]:checked');
-    data.stress = stressChecked ? stressChecked.value : 'moderate';
+    // Chosen Tests
+    const activeChips = document.querySelectorAll('.test-chip.active');
+    const selected = [];
+    activeChips.forEach(chip => {
+      const t = chip.getAttribute('data-test');
+      if (t) selected.push(t);
+    });
+    data.chosen_tests = selected;
 
     // Signature data
-    const fullName = (document.getElementById('full_name').value || '').trim();
     const isDraw = tabDrawSig && tabDrawSig.classList.contains('active');
-
     if (isDraw && hasDrawn) {
-      data.client_signature_image = sigImageInput.value || (sigCanvas ? sigCanvas.toDataURL('image/png') : '');
+      data.client_signature_image = sigImageInput ? sigImageInput.value : (sigCanvas ? sigCanvas.toDataURL('image/png') : '');
       data.client_signature = '';
     } else {
       const typedSig = document.getElementById('client_signature') ? document.getElementById('client_signature').value.trim() : '';
-      data.client_signature = typedSig || fullName;
+      data.client_signature = typedSig || clientName;
       data.client_signature_image = '';
     }
-
-    // Fallback: If neither signed, but consent is agreed, use Full Name as legal typed signature
-    if (!data.client_signature_image && !data.client_signature && fullName) {
-      data.client_signature = fullName;
-    }
-
-    // Trainer data is completely omitted from user intake — left blank for in-person coach signing
-    data.trainer_signature = '';
-    data.trainer_signature_date = '';
-    data.trainer_signature_image = '';
 
     return data;
   }
 
+  // ----------------------------------------------------
+  // 9. SAMPLE DATA AUTO-FILL
+  // ----------------------------------------------------
+  async function fillSampleData() {
+    try {
+      let sample = null;
+      try {
+        const res = await fetch('/api/sample-data');
+        if (res.ok) sample = await res.json();
+      } catch (err) { }
+
+      if (!sample) {
+        sample = {
+          learner_name: 'Keerthan (Master Trainer)',
+          screening_date: formattedToday,
+          client_name: 'Alex Morgan',
+          gender: 'Female',
+          height: '168 cm',
+          weight: '64 kg',
+          age: '28',
+          health_risk_factors: 'No major cardiovascular risks. Occasional lower back tightness after prolonged desk sitting.',
+          medical_history: 'Sprained right ankle during college track in 2021 (fully rehabilitated). No surgical history.',
+          medications: 'Daily multivitamin, Omega-3 fish oil, Vitamin D3.',
+          occupation: 'Senior UX Designer (Desk-bound, 8 hrs/day)',
+          time_availability: '3 to 4 days/week, weekday mornings (6:30 AM - 7:45 AM)',
+          lifestyle_summary: 'Balanced Mediterranean whole food diet, 7-8 hours sleep per night. Tracks 2.5L water intake daily. Non-smoker.',
+          activity_level: 'MEDIUM',
+          training_history: '2 years recreational Pilates and dumbbell workouts at home. Wants structured barbell & hypertrophy programming.',
+          exercise_contraindications: 'Avoid heavy unguided spinal loading initially; focus on core engagement and glute activation.',
+          exercise_likes: 'Squats, deadlifts, kettlebell swings, rowing machine, mobility flows.',
+          exercise_dislikes: 'Long steady-state treadmill running, burpees, heavy overhead military presses.',
+          parq_q1: 'no', parq_q2: 'no', parq_q3: 'no', parq_q4: 'no', parq_q5: 'no',
+          parq_q6: 'no', parq_q7: 'no', parq_q8: 'no', parq_q9: 'no', parq_q10: 'no',
+          client_signature: 'Alex Morgan',
+          exercise_barriers: 'High workload deadlines during sprint weeks. Afternoon fatigue and lack of accountability when training alone.',
+          overcome_strategies: 'Schedule fixed morning training slots before work. Pre-pack gym bag evening prior. Shared weekly check-ins with trainer.',
+          attitude_motivation_summary: 'Highly driven and goal-oriented. Motivated by physical strength gains, better posture, and energy levels for demanding tech career.',
+          instructor_name: 'Keerthan',
+          assessment_date: formattedToday,
+          chosen_tests: ['digital', 'bmi', 'waist circumference', 'bio-electrical impedance', 'press up', 'rockport walking test', 'hamstrings', 'shoulders'],
+          bp_results: '116/74 mmHg (Resting HR: 62 bpm)',
+          bp_reasons: 'Routine baseline assessment before high-intensity resistance.',
+          anthro_results: 'BMI: 22.7 (Normal weight) | Waist: 70 cm | WHR: 0.74',
+          anthro_reasons: 'Standard body composition metrics to gauge progress over 12 weeks.',
+          body_comp_results: 'Body Fat: 21.4% (via bio-electrical impedance scan)',
+          body_comp_reasons: 'Selected bio-electrical impedance for non-invasive speed and comfort.',
+          muscular_results: 'Push-ups: 22 reps | Plank: 1 min 45 sec | Goblet Squat: 20kg x 12 reps',
+          muscular_reasons: 'Baseline muscular endurance and core stability screen.',
+          cardio_results: 'Rockport Walking Test: Estimated VO2max 41.2 ml/kg/min (Good)',
+          cardio_reasons: 'Low impact walking test chosen due to previous ankle history.',
+          rom_results: 'Hamstrings: Normal (85 deg) | Shoulder Flexion: Full ROM (180 deg) | Ankle Dorsiflexion: Symmetrical 35 deg',
+          rom_reasons: 'Screening mobility for safe squat and deadlift mechanics.',
+          posture_results: 'Slight anterior pelvic tilt and forward head posture from computer work. Knees tracking neutral.',
+          posture_reasons: 'Crucial for tailoring corrective warm-up and posterior chain volume.'
+        };
+      }
+
+      // Populate text fields
+      Object.keys(sample).forEach(key => {
+        const el = form.elements[key];
+        if (el && el.type !== 'radio' && el.type !== 'checkbox') {
+          el.value = sample[key];
+        }
+      });
+
+      // Synchronize mirrored names & dates
+      if (parqClientNameInput) parqClientNameInput.value = sample.client_name;
+      if (assessClientNameInput) assessClientNameInput.value = sample.client_name;
+
+      // PAR-Q Radios
+      for (let i = 1; i <= 10; i++) {
+        const val = sample[`parq_q${i}`] || 'no';
+        const r = form.querySelector(`input[name="parq_q${i}"][value="${val}"]`);
+        if (r) r.checked = true;
+      }
+
+      // Set Test Chips
+      const testsToSelect = sample.chosen_tests || [];
+      testChips.forEach(chip => {
+        const tVal = chip.getAttribute('data-test');
+        if (testsToSelect.includes(tVal)) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+
+      // Typed signature mode
+      if (tabTypeSig) tabTypeSig.click();
+      const typedSig = document.getElementById('client_signature');
+      if (typedSig) typedSig.value = sample.client_name;
+
+      calculateBMI();
+      checkPARQStatus();
+      updateChosenTests();
+      updateProgress();
+      showToast('Populated authentic 4-stage assessment sample data', 'success');
+    } catch (e) {
+      console.error('Sample data error:', e);
+      showToast('Error populating sample data', 'error');
+    }
+  }
+
+  if (btnSampleData) {
+    btnSampleData.addEventListener('click', fillSampleData);
+  }
 
   // ----------------------------------------------------
-  // 9. RESET FORM
+  // 10. RESET FORM
   // ----------------------------------------------------
   if (btnResetForm) {
     btnResetForm.addEventListener('click', () => {
-      if (confirm('Are you sure you want to clear all fields?')) {
+      if (confirm('Clear all fields across the 4 assessment stages?')) {
         form.reset();
-        if (sigCanvas && ctx) {
-          ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+        if (sigCtx && sigCanvas) {
+          sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
           hasDrawn = false;
-          sigImageInput.value = '';
         }
+        testChips.forEach(chip => chip.classList.remove('active'));
         calculateBMI();
         checkPARQStatus();
+        updateChosenTests();
         updateProgress();
         showToast('Form cleared', 'info');
       }
@@ -482,380 +649,159 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 10. CLIENT-SIDE PDF GENERATION (PDF-Lib Engine)
+  // 11. 4-PAGE LIVE PREVIEW MODAL
   // ----------------------------------------------------
-  async function generateClientPdfBytes(data) {
-    if (typeof PDFLib === 'undefined') {
-      throw new Error('PDF-Lib library is not available');
-    }
+  async function openLivePreview() {
+    if (!previewModal) return;
+    previewModal.classList.add('show');
+    previewModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
 
-    // Try loading fillable template
-    const pdfRes = await fetch('Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf');
-    if (!pdfRes.ok) {
-      throw new Error(`Failed to load PDF template: HTTP ${pdfRes.status}`);
-    }
-    const existingBytes = await pdfRes.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(existingBytes);
-    const formFields = pdfDoc.getForm();
+    if (previewLoading) previewLoading.style.display = 'flex';
+    if (previewStage) previewStage.style.opacity = '0.3';
 
-    const textFieldNames = [
-      'full_name', 'age', 'gender', 'phone', 'email', 'occupation',
-      'date_of_assessment', 'training_experience', 'preferred_training_time',
-      'parq_details_1', 'parq_details_2',
-      'current_medical_conditions', 'previous_injuries', 'surgeries',
-      'current_medications', 'pain_discomfort', 'other_health_concerns',
-      'medical_additional_details_1', 'medical_additional_details_2',
-      'average_sleep', 'daily_water', 'daily_steps_activity',
-      'current_exercise', 'exercise_frequency', 'typical_work_activity',
-      'dietary_preferences_1', 'dietary_preferences_2',
-      'height', 'weight', 'bmi', 'resting_heart_rate', 'bp_systolic', 'bp_diastolic',
-      'body_assessment_date', 'waist', 'hip', 'chest', 'arm', 'thigh', 'other_measurement',
-      'cardio_test', 'cardio_result', 'cardio_date',
-      'pushups_test', 'pushups_result', 'pushups_notes',
-      'squat_test', 'squat_result', 'squat_notes',
-      'plank_test', 'plank_result', 'plank_notes',
-      'flexibility_test', 'flexibility_result', 'flexibility_notes',
-      'fitness_observations_1', 'fitness_observations_2',
-      'primary_goal', 'target_weight', 'target_date',
-      'secondary_goal', 'training_days_per_week', 'preferred_activities',
-      'specific_goals_1', 'specific_goals_2',
-      'client_signature', 'client_signature_date',
-      'trainer_signature', 'trainer_signature_date'
-    ];
-
-    textFieldNames.forEach(name => {
-      try {
-        const field = formFields.getTextField(name);
-        if (field && data[name] !== undefined && data[name] !== null) {
-          field.setText(String(data[name]));
-        }
-      } catch (e) { }
-    });
-
-    // Checkboxes for PAR-Q
-    for (let i = 1; i <= 7; i++) {
-      const qVal = data[`parq_q${i}`] === 'yes';
-      try {
-        const cbYes = formFields.getCheckBox(`parq_q${i}_yes`);
-        const cbNo = formFields.getCheckBox(`parq_q${i}_no`);
-        if (qVal) {
-          cbYes.check();
-          cbNo.uncheck();
-        } else {
-          cbYes.uncheck();
-          cbNo.check();
-        }
-      } catch (e) { }
-    }
-
-    // Embed client signature drawing image on Page 2 if provided
-    if (data.client_signature_image && data.client_signature_image.startsWith('data:image')) {
-      try {
-        const sigPngBytes = await fetch(data.client_signature_image).then(res => res.arrayBuffer());
-        const sigImage = await pdfDoc.embedPng(sigPngBytes);
-        const pages = pdfDoc.getPages();
-        if (pages.length >= 2) {
-          const p2 = pages[1];
-          const pageHeight = p2.getHeight();
-          // Embed over client signature line
-          p2.drawImage(sigImage, {
-            x: 115,
-            y: pageHeight - 703,
-            width: 140,
-            height: 26
-          });
-        }
-      } catch (imgErr) {
-        console.warn('Could not embed signature PNG into client-side PDF:', imgErr);
-      }
-    }
-
-    return await pdfDoc.save();
-  }
-
-  // ----------------------------------------------------
-  // 11. PDF.JS CLIENT-SIDE VECTOR PREVIEW RENDERING
-  // ----------------------------------------------------
-  async function renderPdfBytesToImages(pdfBytes) {
-    if (typeof pdfjsLib === 'undefined') {
-      throw new Error('PDF.js rendering engine is not loaded');
-    }
-
-    const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
-    const pdf = await loadingTask.promise;
-    const pageDataUrls = [];
-
-    const numPages = Math.min(pdf.numPages, 2);
-    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      // High-resolution scale for razor sharp preview on mobile retina and 4K displays
-      const viewport = page.getViewport({ scale: 2.0 });
-      const offscreenCanvas = document.createElement('canvas');
-      offscreenCanvas.width = viewport.width;
-      offscreenCanvas.height = viewport.height;
-      const offCtx = offscreenCanvas.getContext('2d');
-
-      await page.render({
-        canvasContext: offCtx,
-        viewport: viewport
-      }).promise;
-
-      pageDataUrls.push(offscreenCanvas.toDataURL('image/png'));
-    }
-
-    return pageDataUrls;
-  }
-
-  // ----------------------------------------------------
-  // 12. LIVE PREVIEW MODAL LOGIC (Always Shows User Data)
-  // ----------------------------------------------------
-  async function openPreviewModal() {
-    previewModal.classList.add('open');
-    previewLoading.classList.add('active');
-    if (previewImg1) {
-      previewImg1.style.display = 'none';
-      previewImg1.classList.remove('active');
-    }
-    if (previewImg2) {
-      previewImg2.style.display = 'none';
-      previewImg2.classList.remove('active');
-    }
-
-    const data = getFormDataObject();
-
-    // 1. Try Backend Candidates (Fast PyMuPDF Vector Pixmap)
-    const backendEndpoints = [
-      '/api/preview-pdf',
-      'http://127.0.0.1:5000/api/preview-pdf',
-      'http://localhost:5000/api/preview-pdf'
-    ];
-
-    let backendSuccess = false;
-    for (const url of backendEndpoints) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const result = await res.json();
-          if (result.pages && result.pages.length >= 2) {
-            previewImg1.src = result.pages[0];
-            previewImg2.src = result.pages[1];
-            previewLoading.classList.remove('active');
-            switchPreviewTab(1);
-            backendSuccess = true;
-            return;
-          }
-        }
-      } catch (err) {
-        // Continue to next candidate
-      }
-    }
-
-    if (backendSuccess) return;
-
-    // 2. Client-Side Rendering (PDF-Lib + PDF.js Vector Engine)
-    // Ensures real user data is displayed even on file:///, offline, or mobile LAN!
     try {
-      showToast('Rendering live PDF client-side...', 'info');
-      const pdfBytes = await generateClientPdfBytes(data);
-      const pages = await renderPdfBytesToImages(pdfBytes);
+      const data = getFormDataObject();
 
-      if (pages.length >= 2) {
-        previewImg1.src = pages[0];
-        previewImg2.src = pages[1];
-        previewLoading.classList.remove('active');
-        switchPreviewTab(1);
-        showToast('Live vector preview ready!', 'gold');
-        return;
-      }
-    } catch (clientErr) {
-      console.warn('Client-side vector rendering encountered an error:', clientErr);
-    }
-
-    // 3. Fallback: Dynamic Interactive Summary Sheet (Never show Johnathan Miller!)
-    previewLoading.classList.remove('active');
-    const clientName = data.full_name || 'Client (Name not specified)';
-    previewStage.innerHTML = `
-      <div class="client-preview-card" style="background:#111622;border:1px solid #E6BA55;border-radius:8px;padding:24px;color:#fff;max-width:540px;width:100%;margin:auto;text-align:left;box-shadow:0 8px 30px rgba(0,0,0,0.7);">
-        <div style="border-bottom:1px solid rgba(230,186,85,0.3);padding-bottom:12px;margin-bottom:16px;">
-          <h4 style="font-family:'Cinzel',serif;color:#F2CD73;margin:0 0 4px 0;font-size:1.15rem;">KEERTHAN STRENGTH LAB</h4>
-          <p style="font-size:0.75rem;color:#94A3B8;margin:0;">Live Intake & Assessment Data Confirmation</p>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.82rem;margin-bottom:16px;">
-          <div><strong style="color:#94A3B8;">Full Name:</strong><br><span style="color:#fff;font-weight:700;">${clientName}</span></div>
-          <div><strong style="color:#94A3B8;">Date:</strong><br>${data.date_of_assessment || formattedDate}</div>
-          <div><strong style="color:#94A3B8;">Phone:</strong><br>${data.phone || '—'}</div>
-          <div><strong style="color:#94A3B8;">Email:</strong><br>${data.email || '—'}</div>
-          <div><strong style="color:#94A3B8;">Primary Goal:</strong><br>${data.primary_goal || '—'}</div>
-          <div><strong style="color:#94A3B8;">PAR-Q Status:</strong><br>${parqStatusText.textContent}</div>
-        </div>
-        <div style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:12px;">
-          <strong style="color:#94A3B8;font-size:0.78rem;">Client Authorization:</strong>
-          <div style="margin-top:6px;min-height:50px;display:flex;align-items:center;">
-            ${data.client_signature_image ? `<img src="${data.client_signature_image}" style="max-height:48px;background:rgba(255,255,255,0.05);border-radius:4px;padding:4px;" alt="Signature">` : `<span style="font-family:'Cinzel',serif;color:#F2CD73;font-size:1.2rem;">${data.client_signature || clientName}</span>`}
-          </div>
-        </div>
-        <p style="font-size:0.72rem;color:#10B981;margin:14px 0 0 0;text-align:center;">✓ Verified for official PDF generation</p>
-      </div>
-    `;
-  }
-
-  function closePreviewModal() {
-    previewModal.classList.remove('open');
-  }
-
-  function switchPreviewTab(pageNum) {
-    previewTabs.forEach(tab => {
-      tab.classList.toggle('active', tab.dataset.page === String(pageNum));
-    });
-    if (pageNum === 1) {
-      if (previewImg1) {
-        previewImg1.classList.add('active');
-        previewImg1.style.display = 'block';
-      }
-      if (previewImg2) {
-        previewImg2.classList.remove('active');
-        previewImg2.style.display = 'none';
-      }
-    } else {
-      if (previewImg1) {
-        previewImg1.classList.remove('active');
-        previewImg1.style.display = 'none';
-      }
-      if (previewImg2) {
-        previewImg2.classList.add('active');
-        previewImg2.style.display = 'block';
-      }
-    }
-
-    const viewer = document.querySelector('.preview-viewer');
-    if (viewer) viewer.scrollTop = 0;
-  }
-
-  previewTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      switchPreviewTab(parseInt(tab.dataset.page, 10));
-    });
-  });
-
-  if (btnOpenPreview) btnOpenPreview.addEventListener('click', openPreviewModal);
-  if (btnPreviewBottom) btnPreviewBottom.addEventListener('click', openPreviewModal);
-  if (fabPreview) fabPreview.addEventListener('click', openPreviewModal);
-
-  if (btnClosePreview) btnClosePreview.addEventListener('click', closePreviewModal);
-  if (btnClosePreviewBottom) btnClosePreviewBottom.addEventListener('click', closePreviewModal);
-
-  previewModal.addEventListener('click', (e) => {
-    if (e.target === previewModal) closePreviewModal();
-  });
-
-  // ----------------------------------------------------
-  // 13. PDF DOWNLOAD HANDLER
-  // ----------------------------------------------------
-  async function downloadPDF() {
-    const data = getFormDataObject();
-
-    // Verification: ONLY Full Name is mandatory
-    if (!data.full_name || !data.full_name.trim()) {
-      showToast('Please enter the client\'s Full Name to generate PDF', 'error');
-      const fullNameInput = document.getElementById('full_name');
-      if (fullNameInput) {
-        fullNameInput.focus();
-        fullNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
-
-    showToast('Generating official PDF...', 'gold');
-    setLoadingState(true);
-
-    // 1. Try Backend Generation
-    const backendEndpoints = [
-      '/api/generate-pdf',
-      'http://127.0.0.1:5000/api/generate-pdf',
-      'http://localhost:5000/api/generate-pdf'
-    ];
-
-    for (const url of backendEndpoints) {
+      // Attempt server rendering via PyMuPDF (fastest & 100% exact vector)
+      let pages = null;
       try {
-        const res = await fetch(url, {
+        const res = await fetch('/api/preview-pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-
         if (res.ok) {
-          const blob = await res.blob();
-          const cleanName = data.full_name.trim().replace(/\s+/g, '_');
-          const filename = `Keerthan_Strength_Lab_Screening_${cleanName}.pdf`;
-
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(downloadUrl);
-
-          showToast('Official PDF downloaded successfully!', 'success');
-          setLoadingState(false);
-          return;
+          const json = await res.json();
+          pages = json.pages;
         }
-      } catch (err) {
-        // Try next candidate
+      } catch (srvErr) {
+        console.warn('Server preview endpoint unavailable, attempting client fallback:', srvErr);
       }
-    }
 
-    // 2. Client-side Fallback with PDF-Lib
-    try {
-      showToast('Generating official PDF locally with PDF-Lib...', 'info');
-      const pdfBytes = await generateClientPdfBytes(data);
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const cleanName = data.full_name.trim().replace(/\s+/g, '_');
-      const filename = `Keerthan_Strength_Lab_Screening_${cleanName}.pdf`;
+      if (pages && pages.length >= 4) {
+        if (previewImg1) previewImg1.src = pages[0];
+        if (previewImg2) previewImg2.src = pages[1];
+        if (previewImg3) previewImg3.src = pages[2];
+        if (previewImg4) previewImg4.src = pages[3];
+      } else {
+        // Fallback: static verification preview pages if server offline
+        if (previewImg1) previewImg1.src = 'verify_blank_page1.png';
+        if (previewImg2) previewImg2.src = 'verify_blank_page2.png';
+        if (previewImg3) previewImg3.src = 'verify_blank_page3.png';
+        if (previewImg4) previewImg4.src = 'verify_blank_page4.png';
+      }
 
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-
-      showToast('Official PDF downloaded successfully!', 'success');
+      if (previewLoading) previewLoading.style.display = 'none';
+      if (previewStage) previewStage.style.opacity = '1';
     } catch (err) {
-      console.error('PDF generation error:', err);
-      showToast('Error generating PDF. Please check server or file access.', 'error');
-    } finally {
-      setLoadingState(false);
+      console.error('Preview error:', err);
+      if (previewLoading) previewLoading.style.display = 'none';
+      showToast('Could not generate preview: ' + err.message, 'error');
     }
   }
 
-  function setLoadingState(loading) {
-    document.querySelectorAll('.btn-download-trigger').forEach(btn => {
-      btn.disabled = loading;
-      if (loading) {
-        btn.dataset.originalHtml = btn.innerHTML;
-        btn.innerHTML = '<span>⏳ Generating...</span>';
-      } else if (btn.dataset.originalHtml) {
-        btn.innerHTML = btn.dataset.originalHtml;
-      }
+  function closeLivePreview() {
+    if (!previewModal) return;
+    previewModal.classList.remove('show');
+    previewModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (btnOpenPreview) btnOpenPreview.addEventListener('click', openLivePreview);
+  if (btnPreviewBottom) btnPreviewBottom.addEventListener('click', openLivePreview);
+  if (fabPreview) fabPreview.addEventListener('click', openLivePreview);
+
+  if (btnClosePreview) btnClosePreview.addEventListener('click', closeLivePreview);
+  if (btnClosePreviewBottom) btnClosePreviewBottom.addEventListener('click', closeLivePreview);
+
+  if (previewModal) {
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) closeLivePreview();
     });
   }
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewModal && previewModal.classList.contains('show')) {
+      closeLivePreview();
+    }
+  });
+
+  // Preview Tabs (1, 2, 3, 4)
+  previewTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const pageNum = tab.getAttribute('data-page');
+      previewTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const allImgs = [previewImg1, previewImg2, previewImg3, previewImg4];
+      allImgs.forEach((img, idx) => {
+        if (img) {
+          if (idx + 1 === parseInt(pageNum, 10)) {
+            img.classList.add('active');
+          } else {
+            img.classList.remove('active');
+          }
+        }
+      });
+    });
+  });
+
+  // ----------------------------------------------------
+  // 12. PDF GENERATION & DOWNLOAD
+  // ----------------------------------------------------
+  async function downloadPDF() {
+    const data = getFormDataObject();
+    if (!data.client_name) {
+      showToast('Please enter the Client Name before downloading', 'error');
+      if (clientNameInput) clientNameInput.focus();
+      return;
+    }
+
+    showToast('Compiling official 4-page assessment PDF...', 'info');
+
+    try {
+      const res = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = data.client_name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      a.href = url;
+      a.download = `Keerthan_Strength_Lab_Assessment_${safeName}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Official Assessment PDF downloaded successfully!', 'success');
+      closeLivePreview();
+    } catch (err) {
+      console.warn('Backend download failed, downloading offline fillable template:', err);
+      // Offline fallback: download template directly
+      const a = document.createElement('a');
+      a.href = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
+      a.download = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Downloaded official fillable PDF template', 'info');
+    }
+  }
+
   if (btnDownloadHeader) btnDownloadHeader.addEventListener('click', downloadPDF);
-  if (btnDownloadBottom) btnDownloadBottom.addEventListener('click', downloadPDF);
+  if (btnDownloadBottom) {
+    btnDownloadBottom.addEventListener('click', (e) => {
+      e.preventDefault();
+      downloadPDF();
+    });
+  }
   if (btnDownloadFromModal) btnDownloadFromModal.addEventListener('click', downloadPDF);
   if (fabDownload) fabDownload.addEventListener('click', downloadPDF);
 
@@ -865,7 +811,44 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ----------------------------------------------------
-  // 14. TOAST NOTIFICATION SYSTEM
+  // 13. CINEMATIC LOADER LOGIC
+  // ----------------------------------------------------
+  const loader = document.getElementById('cinematicLoader');
+  const loaderProgressBar = document.getElementById('loaderProgressBar');
+  const loaderPercent = document.getElementById('loaderPercent');
+  const loaderSkipBtn = document.getElementById('loaderSkipBtn');
+
+  if (loader) {
+    let p = 0;
+    const interval = setInterval(() => {
+      p += Math.floor(Math.random() * 20) + 10;
+      if (p >= 100) {
+        p = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+          loader.classList.add('loader-exit');
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 600);
+        }, 200);
+      }
+      if (loaderProgressBar) loaderProgressBar.style.width = `${p}%`;
+      if (loaderPercent) loaderPercent.textContent = `${p}%`;
+    }, 70);
+
+    if (loaderSkipBtn) {
+      loaderSkipBtn.addEventListener('click', () => {
+        clearInterval(interval);
+        loader.classList.add('loader-exit');
+        setTimeout(() => {
+          loader.style.display = 'none';
+        }, 300);
+      });
+    }
+  }
+
+  // ----------------------------------------------------
+  // 14. TOAST NOTIFICATIONS
   // ----------------------------------------------------
   function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
@@ -873,125 +856,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-
-    let icon = 'ℹ️';
-    if (type === 'success') icon = '✅';
-    if (type === 'gold') icon = '✨';
-    if (type === 'error') icon = '⚠️';
-
-    toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-msg">${message}</span>`;
     container.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      toast.style.transition = 'all 0.3s ease';
+      toast.classList.add('toast-fadeout');
       setTimeout(() => toast.remove(), 300);
     }, 3500);
   }
 
   // ----------------------------------------------------
-  // 15. CINEMATIC WEBSITE LOADING SCREEN CONTROLLER
+  // 15. SECTION NAVIGATION SCROLLSPY & SMOOTH SCROLL
   // ----------------------------------------------------
-  const loader = document.getElementById('cinematicLoader');
-  const progressBar = document.getElementById('loaderProgressBar');
-  const percentText = document.getElementById('loaderPercent');
-  const statusText = document.getElementById('loaderStatusText');
-  const skipBtn = document.getElementById('loaderSkipBtn');
+  const navItems = document.querySelectorAll('.section-nav .nav-item');
+  const cardSections = document.querySelectorAll('.card-section');
 
-  let loaderAnimFrame = null;
-  let loaderFinished = false;
-
-  function runCinematicLoader() {
-    if (!loader) return;
-    loaderFinished = false;
-    loader.classList.remove('fade-out');
-    loader.style.visibility = 'visible';
-    loader.style.display = 'flex';
-
-    if (progressBar) progressBar.style.width = '0%';
-    if (percentText) percentText.textContent = '0%';
-    if (statusText) statusText.textContent = 'INITIALIZING PERFORMANCE LAB';
-
-    const duration = 3200; // 3.2s smooth cinematic intro duration
-    const startTime = performance.now();
-
-    function updateLoader(currentTime) {
-      if (loaderFinished) return;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      // Eased progress curve (smooth cinematic acceleration and deceleration)
-      const eased = progress < 0.5 
-        ? 2 * progress * progress 
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-
-      const pct = Math.round(eased * 100);
-
-      if (progressBar) progressBar.style.width = `${pct}%`;
-      if (percentText) percentText.textContent = `${pct}%`;
-
-      if (statusText) {
-        if (pct < 30) {
-          statusText.textContent = 'INITIALIZING PERFORMANCE LAB';
-        } else if (pct < 65) {
-          statusText.textContent = 'CALIBRATING ASSESSMENT SYSTEMS';
-        } else if (pct < 95) {
-          statusText.textContent = 'LOADING CLINICAL PROTOCOLS';
-        } else {
-          statusText.textContent = 'PRECISION LAB READY';
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      const targetId = item.getAttribute('href');
+      if (targetId && targetId.startsWith('#')) {
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          navItems.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
+    });
+  });
 
-      if (progress < 1) {
-        loaderAnimFrame = requestAnimationFrame(updateLoader);
-      } else {
-        finishLoader();
+  window.addEventListener('scroll', () => {
+    let currentId = '';
+    const scrollPos = window.scrollY + 180;
+    cardSections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      if (scrollPos >= top && scrollPos < top + height) {
+        currentId = section.getAttribute('id');
       }
+    });
+
+    if (currentId) {
+      navItems.forEach(item => {
+        if (item.getAttribute('href') === `#${currentId}`) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
     }
+  }, { passive: true });
 
-    loaderAnimFrame = requestAnimationFrame(updateLoader);
-  }
-
-  function finishLoader() {
-    if (loaderFinished) return;
-    loaderFinished = true;
-    if (loaderAnimFrame) cancelAnimationFrame(loaderAnimFrame);
-
-    if (progressBar) progressBar.style.width = '100%';
-    if (percentText) percentText.textContent = '100%';
-    if (statusText) statusText.textContent = 'PRECISION LAB READY';
-
-    setTimeout(() => {
-      if (loader) {
-        loader.classList.add('fade-out');
-        setTimeout(() => {
-          loader.style.display = 'none';
-        }, 850);
-      }
-    }, 220);
-  }
-
-  if (skipBtn) {
-    skipBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      finishLoader();
-    });
-  }
-
-  if (loader) {
-    loader.addEventListener('click', (e) => {
-      // Click anywhere to immediately enter website
-      finishLoader();
-    });
-  }
-
-  // Run cinematic loader on initial load
-  runCinematicLoader();
-
-  // ----------------------------------------------------
-  // 16. INITIALIZATION
-  // ----------------------------------------------------
+  // Initial calculation check
   calculateBMI();
   checkPARQStatus();
+  updateChosenTests();
   updateProgress();
 });
