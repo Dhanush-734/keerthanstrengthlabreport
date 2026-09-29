@@ -36,18 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const bmiBadge = document.getElementById('bmiBadge');
   const clientNotesInput = document.getElementById('client_notes');
 
-  // Status Badges & Progress
+  // Progress Bar
   const progressFill = document.getElementById('progressFill');
   const progressPercent = document.getElementById('progressPercent');
-  const statusItemClient = document.getElementById('statusItemClient');
-  const statusItemParq = document.getElementById('statusItemParq');
-  const statusItemSig = document.getElementById('statusItemSig');
-
-  // PAR-Q Banner Elements
-  const parqStatusBanner = document.getElementById('parqStatusBanner');
-  const parqIcon = document.getElementById('parqIcon');
-  const parqTitle = document.getElementById('parqTitle');
-  const parqSubtitle = document.getElementById('parqSubtitle');
 
   // Initial Assessment Section (Read-Only)
   const secAssessment = document.getElementById('sec-assessment');
@@ -220,48 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (weightInput) weightInput.addEventListener('input', calculateBMI);
 
   // ----------------------------------------------------
-  // 5. PAR-Q QUESTION CHECKER & STATUS BANNER
+  // 5. PAR-Q QUESTION CHECKER
   // ----------------------------------------------------
   function checkPARQStatus() {
-    let hasYes = false;
-    let answeredCount = 0;
-
-    for (let i = 1; i <= 10; i++) {
-      const radios = document.getElementsByName(`parq_q${i}`);
-      for (const r of radios) {
-        if (r.checked) {
-          answeredCount++;
-          if (r.value === 'yes') hasYes = true;
-        }
-      }
-    }
-
-    if (!parqStatusBanner || !parqIcon || !parqTitle || !parqSubtitle) return;
-
-    if (hasYes) {
-      parqStatusBanner.className = 'parq-alert-box alert-warning';
-      parqIcon.textContent = '⚠️';
-      parqTitle.textContent = 'PHYSICIAN CLEARANCE RECOMMENDED BEFORE EXERCISE';
-      parqSubtitle.textContent = 'You answered "YES" to one or more PAR-Q health questions. Please consult your physician or qualified medical doctor prior to engaging in vigorous physical activity.';
-      if (statusItemParq) {
-        statusItemParq.className = 'status-pill status-warn';
-        statusItemParq.innerHTML = '⚠️ PAR-Q: <em>Doctor Clearance Advised</em>';
-      }
-    } else if (answeredCount === 10) {
-      parqStatusBanner.className = 'parq-alert-box alert-clear';
-      parqIcon.textContent = '✅';
-      parqTitle.textContent = 'EXCELLENT: ALL PAR-Q SCREENERS ANSWERED "NO"';
-      parqSubtitle.textContent = 'Client is cleared to participate in vigorous physical activity, baseline cardiovascular screens, and resistance assessments without preliminary medical referral.';
-      if (statusItemParq) {
-        statusItemParq.className = 'status-pill status-ready';
-        statusItemParq.innerHTML = '🩺 PAR-Q: <em>Cleared for Exercise</em>';
-      }
-    } else {
-      parqStatusBanner.className = 'parq-alert-box alert-clear';
-      parqIcon.textContent = 'ℹ️';
-      parqTitle.textContent = 'PAR-Q QUESTIONNAIRE IN PROGRESS';
-      parqSubtitle.textContent = `Completed ${answeredCount} of 10 health screening questions.`;
-    }
+    // Status banner & badge strip removed per user request
   }
 
   const parqRadios = document.querySelectorAll('.parq-radio');
@@ -403,27 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (progressFill) progressFill.style.width = `${totalScore}%`;
     if (progressPercent) progressPercent.textContent = `${totalScore}%`;
-
-    // Status Badges
-    if (statusItemClient) {
-      if (nameVal) {
-        statusItemClient.className = 'status-pill status-ready';
-        statusItemClient.innerHTML = `📋 Client: <em>${nameVal}</em>`;
-      } else {
-        statusItemClient.className = 'status-pill status-pending';
-        statusItemClient.innerHTML = '📋 Client Profile: <em>Incomplete</em>';
-      }
-    }
-
-    if (statusItemSig) {
-      if (hasSig) {
-        statusItemSig.className = 'status-pill status-ready';
-        statusItemSig.innerHTML = '✍️ Signature: <em>Confirmed</em>';
-      } else {
-        statusItemSig.className = 'status-pill status-mand';
-        statusItemSig.innerHTML = '✍️ Signature: <em>Required</em>';
-      }
-    }
   }
 
   // ----------------------------------------------------
