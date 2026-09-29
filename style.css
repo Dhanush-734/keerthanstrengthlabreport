@@ -681,41 +681,6 @@ body {
   transition: width 0.3s ease;
 }
 
-.section-nav {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.section-nav::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-chip {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.nav-chip:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.nav-chip.active {
-  background: rgba(230, 186, 85, 0.15);
-  color: var(--gold-300);
-  border-color: rgba(230, 186, 85, 0.4);
-}
 
 /* ---------------- CARD SECTION ---------------- */
 .card-section {
@@ -1972,17 +1937,6 @@ body {
     margin-bottom: 20px;
   }
 
-  .section-nav {
-    gap: 6px;
-    padding: 2px 0 6px 0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nav-chip {
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    flex-shrink: 0;
-  }
 
   /* Card headers */
   .sec-title-row {

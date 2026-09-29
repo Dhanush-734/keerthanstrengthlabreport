@@ -815,48 +815,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3500);
   }
 
-  // ----------------------------------------------------
-  // 16. SECTION NAVIGATION SCROLLSPY & SMOOTH SCROLL
-  // ----------------------------------------------------
-  const navItems = document.querySelectorAll('.section-nav .nav-item');
-  const cardSections = document.querySelectorAll('.card-section');
-
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      const targetId = item.getAttribute('href');
-      if (targetId && targetId.startsWith('#')) {
-        const targetEl = document.querySelector(targetId);
-        if (targetEl) {
-          e.preventDefault();
-          navItems.forEach(i => i.classList.remove('active'));
-          item.classList.add('active');
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    });
-  });
-
-  window.addEventListener('scroll', () => {
-    let currentId = '';
-    const scrollPos = window.scrollY + 180;
-    cardSections.forEach(section => {
-      const top = section.offsetTop;
-      const height = section.offsetHeight;
-      if (scrollPos >= top && scrollPos < top + height) {
-        currentId = section.getAttribute('id');
-      }
-    });
-
-    if (currentId) {
-      navItems.forEach(item => {
-        if (item.getAttribute('href') === `#${currentId}`) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
-      });
-    }
-  }, { passive: true });
 
   // Initial UI state setup
   calculateBMI();
