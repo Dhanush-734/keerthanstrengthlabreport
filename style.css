@@ -1398,6 +1398,12 @@ body {
   align-items: center;
   gap: 5px;
   letter-spacing: 0.4px;
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+}
+
+.developer-credit:hover {
+  opacity: 0.85;
 }
 
 .dev-link {
