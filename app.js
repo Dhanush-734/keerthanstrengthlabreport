@@ -584,6 +584,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previewImg4 && pages[3]) previewImg4.src = pages[3];
   }
 
+  async function renderClientFallbackPages() {
+    // 1. Try rendering official PDF via client-side PDF.js
+    if (window.pdfjsLib) {
+      try {
+        const loadingTask = pdfjsLib.getDocument('Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf');
+        const pdfDoc = await loadingTask.promise;
+        const rendered = [];
+        const count = Math.min(4, pdfDoc.numPages);
+        for (let i = 1; i <= count; i++) {
+          const page = await pdfDoc.getPage(i);
+          const viewport = page.getViewport({ scale: 1.75 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          rendered.push(canvas.toDataURL('image/png'));
+        }
+        if (rendered.length >= 4) {
+          return rendered;
+        }
+      } catch (pdfErr) {
+        console.warn('Client PDF.js render fallback:', pdfErr);
+      }
+    }
+
+    // 2. High-res pre-rendered vector assets fallback
+    return [
+      'assets/preview/page_1.png',
+      'assets/preview/page_2.png',
+      'assets/preview/page_3.png',
+      'assets/preview/page_4.png'
+    ];
+  }
+
   async function openLivePreview() {
     if (!previewModal) return;
 
@@ -634,8 +669,8 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(`Server returned HTTP ${res.status}`);
         }
       } catch (srvErr) {
-        console.warn('Server preview error:', srvErr);
-        throw srvErr;
+        console.warn('Server preview error, falling back to client-side vector preview:', srvErr);
+        pages = await renderClientFallbackPages();
       }
 
       if (pages && pages.length >= 4) {

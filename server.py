@@ -9,10 +9,12 @@ from pdf_service import generate_screening_pdf
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 @app.route('/')
+@app.route('/api')
 def index():
     return send_from_directory('.', 'index.html')
 
 @app.route('/api/health')
+@app.route('/health')
 def health():
     return jsonify({
         'status': 'ok',
@@ -20,6 +22,7 @@ def health():
     })
 
 @app.route('/api/sample-data')
+@app.route('/sample-data')
 def get_sample_data():
     sample = {
         'learner_name': 'Keerthan (Master Trainer)',
@@ -70,6 +73,7 @@ def get_sample_data():
     return jsonify(sample)
 
 @app.route('/api/generate-pdf', methods=['POST', 'OPTIONS'])
+@app.route('/generate-pdf', methods=['POST', 'OPTIONS'])
 def generate_pdf_endpoint():
     if request.method == 'OPTIONS':
         return ('', 204)
@@ -90,6 +94,7 @@ def generate_pdf_endpoint():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/preview-pdf', methods=['POST', 'OPTIONS'])
+@app.route('/preview-pdf', methods=['POST', 'OPTIONS'])
 def preview_pdf_endpoint():
     if request.method == 'OPTIONS':
         return ('', 204)
