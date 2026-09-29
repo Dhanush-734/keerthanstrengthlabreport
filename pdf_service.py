@@ -121,9 +121,9 @@ def render_page_1(doc, data, is_fillable=False):
     y += 20.0
     
     # Title line
-    p.insert_text(pymupdf.Point(left_m, y + 15), "1. Client Screening Form ", 
+    p.insert_text(pymupdf.Point(left_m, y + 15), "Client Screening Form ", 
                   fontsize=12.0, fontname="Helvetica-Bold", color=C_HEADER_BLUE)
-    w_t1 = pymupdf.get_text_length("1. Client Screening Form ", "Helvetica-Bold", 12.0)
+    w_t1 = pymupdf.get_text_length("Client Screening Form ", "Helvetica-Bold", 12.0)
     p.insert_text(pymupdf.Point(left_m + w_t1, y + 15), "(Learner to complete with client)", 
                   fontsize=10.0, fontname="Helvetica-BoldOblique", color=C_SUBTITLE_RED)
     
@@ -305,9 +305,9 @@ def render_page_2(doc, data, is_fillable=False):
     y += 20.0
     
     # Title line
-    p.insert_text(pymupdf.Point(left_m, y + 15), "2. Physical Activity Readiness Questionnaire (PAR-Q) ", 
+    p.insert_text(pymupdf.Point(left_m, y + 15), "Physical Activity Readiness Questionnaire (PAR-Q) ", 
                   fontsize=11.5, fontname="Helvetica-Bold", color=C_HEADER_BLUE)
-    w_t2 = pymupdf.get_text_length("2. Physical Activity Readiness Questionnaire (PAR-Q) ", "Helvetica-Bold", 11.5)
+    w_t2 = pymupdf.get_text_length("Physical Activity Readiness Questionnaire (PAR-Q) ", "Helvetica-Bold", 11.5)
     p.insert_text(pymupdf.Point(left_m + w_t2, y + 15), "(Client to complete)", 
                   fontsize=10.0, fontname="Helvetica-BoldOblique", color=C_SUBTITLE_RED)
     
@@ -443,9 +443,9 @@ def render_page_3(doc, data, is_fillable=False):
     y += 20.0
     
     # Title line
-    p.insert_text(pymupdf.Point(left_m, y + 15), "4. Initial Assessment ", 
+    p.insert_text(pymupdf.Point(left_m, y + 15), "Initial Assessment ", 
                   fontsize=12.0, fontname="Helvetica-Bold", color=C_HEADER_BLUE)
-    w_t4 = pymupdf.get_text_length("4. Initial Assessment ", "Helvetica-Bold", 12.0)
+    w_t4 = pymupdf.get_text_length("Initial Assessment ", "Helvetica-Bold", 12.0)
     p.insert_text(pymupdf.Point(left_m + w_t4, y + 15), "(Learner to complete)", 
                   fontsize=10.0, fontname="Helvetica-BoldOblique", color=C_SUBTITLE_RED)
     
@@ -558,54 +558,70 @@ def render_page_4(doc, data, is_fillable=False):
     draw_brand_header(p, left_m, right_m, y)
     y += 20.0
 
-    # Header Box
-    hdr_h = 44.0
+    # Header Box (Compact)
+    hdr_h = 36.0
     draw_cell(p, left_m, y, content_w, hdr_h, bg_color=C_TH_BG)
-    cell_text_single(p, "Client's barriers to exercise", left_m + 8, y + 4, content_w - 16, 14.0, fontsize=10.0, bold=True)
+    cell_text_single(p, "Client's barriers to exercise", left_m + 8, y + 3, content_w - 16, 13.0, fontsize=9.5, bold=True)
     
     sub_desc = "Establish the physical, psychological and social reasons for clients' participation in an exercise program, help clients to identify barriers to adherence and how to overcome them."
-    draw_wrapped_text(p, sub_desc, left_m + 8, y + 20, content_w - 16, fontsize=7.5, line_height=9.5)
+    draw_wrapped_text(p, sub_desc, left_m + 8, y + 17, content_w - 16, fontsize=7.0, line_height=8.5)
     y += hdr_h
 
-    # Table 1: 2-Column Matrix (Barriers vs Strategies)
+    # Table 1: 2-Column Matrix (Barriers vs Strategies) - Compact
     w_half = content_w / 2.0
-    th_h = 26.0
+    th_h = 22.0
 
     draw_cell(p, left_m, y, w_half, th_h, bg_color=C_TH_SUB_BG)
     draw_wrapped_text(p, "Barriers to exercising and achieving goals including motivational barriers", 
-                      left_m + 6, y + 4, w_half - 12, fontsize=7.8, bold=True, line_height=9.5)
+                      left_m + 6, y + 3, w_half - 12, fontsize=7.2, bold=True, line_height=8.5)
 
     draw_cell(p, left_m + w_half, y, w_half, th_h, bg_color=C_TH_SUB_BG)
-    cell_text_single(p, "Strategies to overcome them", left_m + w_half + 6, y, w_half - 12, th_h, fontsize=8.0, bold=True)
+    cell_text_single(p, "Strategies to overcome them", left_m + w_half + 6, y, w_half - 12, th_h, fontsize=7.8, bold=True)
     y += th_h
 
-    # Data row for barriers & strategies
-    box_h = 240.0
+    # Compact Data row for barriers & strategies (~105pt instead of 240pt)
+    box_h = 105.0
     draw_cell(p, left_m, y, w_half, box_h, bg_color=C_WHITE)
     if is_fillable:
         add_widget_field(p, "exercise_barriers", left_m, y, w_half, box_h, data.get('exercise_barriers', ''), multiline=True)
     else:
-        draw_wrapped_text(p, data.get('exercise_barriers', ''), left_m + 8, y + 8, w_half - 16, fontsize=8.0, line_height=11.0)
+        draw_wrapped_text(p, data.get('exercise_barriers', ''), left_m + 6, y + 6, w_half - 12, fontsize=7.5, line_height=10.0)
 
     draw_cell(p, left_m + w_half, y, w_half, box_h, bg_color=C_WHITE)
     if is_fillable:
         add_widget_field(p, "overcome_strategies", left_m + w_half, y, w_half, box_h, data.get('overcome_strategies', ''), multiline=True)
     else:
-        draw_wrapped_text(p, data.get('overcome_strategies', ''), left_m + w_half + 8, y + 8, w_half - 16, fontsize=8.0, line_height=11.0)
+        draw_wrapped_text(p, data.get('overcome_strategies', ''), left_m + w_half + 6, y + 6, w_half - 12, fontsize=7.5, line_height=10.0)
     y += box_h
 
-    # Table 2: Summary of the client's attitude and motivation to exercise
-    th_sum_h = 20.0
+    # Table 2: Summary of the client's attitude and motivation to exercise - Compact (~75pt instead of 210pt)
+    th_sum_h = 18.0
     draw_cell(p, left_m, y, content_w, th_sum_h, bg_color=C_TH_SUB_BG)
-    cell_text_single(p, "Summary of the client's attitude and motivation to exercise", left_m + 8, y, content_w - 16, th_sum_h, fontsize=8.2, bold=True)
+    cell_text_single(p, "Summary of the client's attitude and motivation to exercise", left_m + 8, y, content_w - 16, th_sum_h, fontsize=8.0, bold=True)
     y += th_sum_h
 
-    sum_box_h = 210.0
+    sum_box_h = 75.0
     draw_cell(p, left_m, y, content_w, sum_box_h, bg_color=C_WHITE)
     if is_fillable:
         add_widget_field(p, "attitude_motivation_summary", left_m, y, content_w, sum_box_h, data.get('attitude_motivation_summary', ''), multiline=True)
     else:
-        draw_wrapped_text(p, data.get('attitude_motivation_summary', ''), left_m + 8, y + 8, content_w - 16, fontsize=8.2, line_height=11.5)
+        draw_wrapped_text(p, data.get('attitude_motivation_summary', ''), left_m + 8, y + 6, content_w - 16, fontsize=7.8, line_height=10.5)
+    y += sum_box_h + 16.0
+
+    # Table 3: NEW SECTION - Client Notes / Additional Information
+    th_notes_h = 24.0
+    draw_cell(p, left_m, y, content_w, th_notes_h, bg_color=C_TH_BG)
+    cell_text_single(p, "Client Notes / Additional Information", left_m + 8, y + 2, content_w - 16, 12.0, fontsize=8.8, bold=True)
+    draw_wrapped_text(p, "Tell us anything else you'd like your trainer to know (goals, concerns, preferences, questions).", 
+                      left_m + 8, y + 13, content_w - 16, fontsize=6.8, line_height=8.0)
+    y += th_notes_h
+
+    notes_box_h = 150.0
+    draw_cell(p, left_m, y, content_w, notes_box_h, bg_color=C_WHITE)
+    if is_fillable:
+        add_widget_field(p, "client_notes", left_m, y, content_w, notes_box_h, data.get('client_notes', ''), multiline=True)
+    else:
+        draw_wrapped_text(p, data.get('client_notes', ''), left_m + 8, y + 6, content_w - 16, fontsize=7.8, line_height=10.5)
 
 # ==============================================================================
 # MAIN ENTRYPOINT: generate_screening_pdf

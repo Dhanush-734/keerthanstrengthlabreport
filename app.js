@@ -1,14 +1,16 @@
 /**
- * KEERTHAN STRENGTH LAB - 4-Stage Assessment Dossier Portal
+ * KEERTHAN STRENGTH LAB - Official Assessment Dossier Portal
  * Logic for:
  * 1. Client Screening Intake & Demographics
  * 2. 10-Question PAR-Q Safety Screener & Physician Alerts
- * 3. Exercise Barriers & Adherence Strategies
- * 4. Initial Assessment Record with Interactive Test Selector Chips (Min 3 required)
- * 5. Digital Touch/Mouse Signature Pad & Typed Fallback
- * 6. Live BMI Calculator & Cross-Section Data Synchronization
- * 7. 4-Page Live Vector PDF Preview Modal
- * 8. Server-Side & Offline Client-Side PDF Generation
+ * 3. Compact Exercise Barriers & Adherence Strategies
+ * 4. Client Notes & Personal Considerations (Free-form multiline)
+ * 5. Trainer-Only Initial Assessment & Role-Based Permissions (Read-only for clients)
+ * 6. Digital Touch/Mouse Signature Pad & Typed Fallback
+ * 7. Live BMI Calculator & Cross-Section Data Synchronization
+ * 8. 4-Page Live Vector PDF Preview Modal
+ * 9. Server-Side & Offline Client-Side PDF Generation
+ * 10. SQLite Database Integration for Client Profiles & Trainer Assessments
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bmiDisplay = document.getElementById('bmiDisplay');
   const bmiBadge = document.getElementById('bmiBadge');
   const anthroResultsInput = document.getElementById('anthro_results');
+  const clientNotesInput = document.getElementById('client_notes');
 
   // Status Badges
   const progressFill = document.getElementById('progressFill');
@@ -50,13 +53,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const parqTitle = document.getElementById('parqTitle');
   const parqSubtitle = document.getElementById('parqSubtitle');
 
-  // Test Selection Elements
+  // Initial Assessment & Role Elements
+  const secAssessment = document.getElementById('sec-assessment');
+  const assessRoleBadge = document.getElementById('assessRoleBadge');
+  const assessReadonlyNotice = document.getElementById('assessReadonlyNotice');
+  const assessTrainerToolbar = document.getElementById('assessTrainerToolbar');
+  const btnSaveAssessment = document.getElementById('btnSaveAssessment');
+  const testInstructionText = document.getElementById('testInstructionText');
   const testChips = document.querySelectorAll('.test-chip');
   const chosenTestsInput = document.getElementById('chosen_tests');
   const testSelectionBadge = document.getElementById('testSelectionBadge');
   const badgeCountDisplay = document.getElementById('badgeCountDisplay');
 
+  // Trainer Portal Elements
+  const btnTrainerPortal = document.getElementById('btnTrainerPortal');
+  const trainerPortalBtnText = document.getElementById('trainerPortalBtnText');
+  const btnClientRoster = document.getElementById('btnClientRoster');
+  const rosterCount = document.getElementById('rosterCount');
+  const btnLogoutTrainer = document.getElementById('btnLogoutTrainer');
+
+  // Trainer Auth Modal Elements
+  const trainerAuthModal = document.getElementById('trainerAuthModal');
+  const btnCloseTrainerAuth = document.getElementById('btnCloseTrainerAuth');
+  const btnCancelTrainerAuth = document.getElementById('btnCancelTrainerAuth');
+  const trainerAuthForm = document.getElementById('trainerAuthForm');
+  const trainerPasscodeInput = document.getElementById('trainerPasscode');
+
+  // Client Roster Modal Elements
+  const clientRosterModal = document.getElementById('clientRosterModal');
+  const btnCloseClientRoster = document.getElementById('btnCloseClientRoster');
+  const btnCloseClientRosterBottom = document.getElementById('btnCloseClientRosterBottom');
+  const rosterListContainer = document.getElementById('rosterListContainer');
+  const rosterSearchInput = document.getElementById('rosterSearchInput');
+
   // Action Buttons
+  const btnRegisterClient = document.getElementById('btnRegisterClient');
   const btnSampleData = document.getElementById('btnSampleData');
   const btnResetForm = document.getElementById('btnResetForm');
   const btnOpenPreview = document.getElementById('btnOpenPreview');
@@ -93,6 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const drawSigBox = document.getElementById('drawSigBox');
   const typeSigBox = document.getElementById('typeSigBox');
   const sigImageInput = document.getElementById('client_signature_image');
+
+  // Active Client Tracking (for updates)
+  let activeClientId = null;
+  let cachedRoster = [];
 
   // Initialize Today's Date
   const today = new Date();
@@ -142,7 +177,355 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 2. DATA SYNCHRONIZATION ACROSS SECTIONS
+  // 2. ROLE-BASED ACCESS CONTROL (CLIENT VS TRAINER)
+  // ----------------------------------------------------
+  function isTrainer() {
+    return Boolean(sessionStorage.getItem('ksl_trainer_token'));
+  }
+
+  function getTrainerAuthHeaders() {
+    const token = sessionStorage.getItem('ksl_trainer_token') || '';
+    return {
+      'Content-Type': 'application/json',
+      'X-Trainer-Key': token,
+      'Authorization': `Bearer ${token}`
+    };
+  }
+
+  function updateRoleUI() {
+    const trainerActive = isTrainer();
+
+    if (trainerActive) {
+      document.body.classList.add('is-trainer-mode');
+      document.body.classList.remove('is-readonly-mode');
+
+      if (btnTrainerPortal) btnTrainerPortal.classList.add('active');
+      if (trainerPortalBtnText) trainerPortalBtnText.textContent = 'Coach Mode';
+      if (btnClientRoster) btnClientRoster.classList.remove('hidden');
+      if (btnLogoutTrainer) btnLogoutTrainer.classList.remove('hidden');
+
+      if (assessRoleBadge) {
+        assessRoleBadge.className = 'sec-badge badge-trainer';
+        assessRoleBadge.textContent = '⚡ Trainer Mode — Full Edit Access';
+      }
+      if (assessReadonlyNotice) assessReadonlyNotice.classList.add('hidden');
+      if (assessTrainerToolbar) assessTrainerToolbar.classList.remove('hidden');
+
+      // Enable Initial Assessment fields for trainer editing
+      const assessInputs = secAssessment ? secAssessment.querySelectorAll('input:not(#assessment_client_name), textarea') : [];
+      assessInputs.forEach(inp => {
+        inp.readOnly = false;
+        inp.disabled = false;
+      });
+
+      if (testInstructionText) {
+        testInstructionText.textContent = 'Select conducted clinical tests in the lab (minimum of three recommended).';
+      }
+    } else {
+      document.body.classList.remove('is-trainer-mode');
+      document.body.classList.add('is-readonly-mode');
+
+      if (btnTrainerPortal) btnTrainerPortal.classList.remove('active');
+      if (trainerPortalBtnText) trainerPortalBtnText.textContent = 'Trainer Portal';
+      if (btnClientRoster) btnClientRoster.classList.add('hidden');
+      if (btnLogoutTrainer) btnLogoutTrainer.classList.add('hidden');
+
+      if (assessRoleBadge) {
+        assessRoleBadge.className = 'sec-badge badge-readonly';
+        assessRoleBadge.textContent = '🔒 Trainer Assessment — Read Only';
+      }
+      if (assessReadonlyNotice) assessReadonlyNotice.classList.remove('hidden');
+      if (assessTrainerToolbar) assessTrainerToolbar.classList.add('hidden');
+
+      // Lock Initial Assessment fields for client viewing
+      const assessInputs = secAssessment ? secAssessment.querySelectorAll('input, textarea') : [];
+      assessInputs.forEach(inp => {
+        inp.readOnly = true;
+        inp.disabled = true;
+      });
+
+      if (testInstructionText) {
+        testInstructionText.textContent = 'Trainer Assessment — Read Only: Tests and clinical observations recorded by your coach appear below.';
+      }
+    }
+
+    // Refresh roster counter if trainer
+    if (trainerActive) {
+      fetchClientRosterCount();
+    }
+  }
+
+  // ----------------------------------------------------
+  // 3. TRAINER AUTHENTICATION MODAL LOGIC
+  // ----------------------------------------------------
+  function openTrainerAuthModal() {
+    if (!trainerAuthModal) return;
+    trainerAuthModal.classList.add('show');
+    trainerAuthModal.setAttribute('aria-hidden', 'false');
+    if (trainerPasscodeInput) {
+      trainerPasscodeInput.value = '';
+      setTimeout(() => trainerPasscodeInput.focus(), 150);
+    }
+  }
+
+  function closeTrainerAuthModal() {
+    if (!trainerAuthModal) return;
+    trainerAuthModal.classList.remove('show');
+    trainerAuthModal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnTrainerPortal) {
+    btnTrainerPortal.addEventListener('click', () => {
+      if (isTrainer()) {
+        openClientRosterModal();
+      } else {
+        openTrainerAuthModal();
+      }
+    });
+  }
+
+  if (btnCloseTrainerAuth) btnCloseTrainerAuth.addEventListener('click', closeTrainerAuthModal);
+  if (btnCancelTrainerAuth) btnCancelTrainerAuth.addEventListener('click', closeTrainerAuthModal);
+
+  if (trainerAuthForm) {
+    trainerAuthForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = trainerPasscodeInput ? trainerPasscodeInput.value.trim() : '';
+      if (!code) return;
+
+      try {
+        const res = await fetch('/api/trainer/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode: code })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          sessionStorage.setItem('ksl_trainer_token', data.token || 'ksl_trainer_token_auth_2026');
+          closeTrainerAuthModal();
+          updateRoleUI();
+          showToast(`Trainer access unlocked! Welcome, ${data.trainer_name || 'Coach'}.`, 'success');
+        } else {
+          showToast(data.error || 'Invalid trainer passcode.', 'error');
+          if (trainerPasscodeInput) trainerPasscodeInput.select();
+        }
+      } catch (err) {
+        console.error('Trainer auth error:', err);
+        showToast('Authentication network error: ' + err.message, 'error');
+      }
+    });
+  }
+
+  if (btnLogoutTrainer) {
+    btnLogoutTrainer.addEventListener('click', () => {
+      sessionStorage.removeItem('ksl_trainer_token');
+      updateRoleUI();
+      showToast('Exited Trainer Mode. Switched to Client View (Initial Assessment is Read-Only).', 'info');
+    });
+  }
+
+  // ----------------------------------------------------
+  // 4. CLIENT ROSTER MODAL LOGIC (TRAINER ONLY)
+  // ----------------------------------------------------
+  async function fetchClientRosterCount() {
+    try {
+      const res = await fetch('/api/clients');
+      if (res.ok) {
+        const data = await res.json();
+        const count = data.count || (data.clients ? data.clients.length : 0);
+        if (rosterCount) rosterCount.textContent = count;
+        cachedRoster = data.clients || [];
+      }
+    } catch (e) {
+      console.warn('Could not fetch client count:', e);
+    }
+  }
+
+  async function openClientRosterModal() {
+    if (!clientRosterModal) return;
+    clientRosterModal.classList.add('show');
+    clientRosterModal.setAttribute('aria-hidden', 'false');
+    renderRosterList();
+
+    try {
+      const res = await fetch('/api/clients');
+      if (res.ok) {
+        const data = await res.json();
+        cachedRoster = data.clients || [];
+        renderRosterList(cachedRoster);
+      }
+    } catch (e) {
+      console.error('Roster error:', e);
+    }
+  }
+
+  function closeClientRosterModal() {
+    if (!clientRosterModal) return;
+    clientRosterModal.classList.remove('show');
+    clientRosterModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderRosterList(clients = cachedRoster) {
+    if (!rosterListContainer) return;
+    const filter = rosterSearchInput ? rosterSearchInput.value.toLowerCase().trim() : '';
+
+    const filtered = clients.filter(c => {
+      const name = (c.client_name || '').toLowerCase();
+      const notes = (c.client_notes || '').toLowerCase();
+      return name.includes(filter) || notes.includes(filter);
+    });
+
+    if (filtered.length === 0) {
+      rosterListContainer.innerHTML = `
+        <div class="panel-box text-center p-4">
+          <p style="color: var(--text-muted); font-size: 0.85rem;">No client records match your query.</p>
+        </div>
+      `;
+      return;
+    }
+
+    rosterListContainer.innerHTML = filtered.map(c => {
+      const isDone = Boolean(c.assessment_completed);
+      const statusBadge = isDone 
+        ? `<span class="badge-assess-status badge-assess-done">✓ Assessment Completed</span>`
+        : `<span class="badge-assess-status badge-assess-pending">⏳ Awaiting In-Lab Assessment</span>`;
+
+      const notesSnippet = c.client_notes 
+        ? `<span class="roster-notes-snippet">📝 Notes: "${escapeHtml(c.client_notes.substring(0, 90))}${c.client_notes.length > 90 ? '...' : ''}"</span>`
+        : `<span class="roster-notes-snippet" style="opacity: 0.5;">No client notes recorded</span>`;
+
+      return `
+        <div class="roster-item-card" data-client-id="${c.client_id}">
+          <div class="roster-client-info">
+            <h4>${escapeHtml(c.client_name)} ${statusBadge}</h4>
+            <div class="roster-client-meta">
+              <span>📅 Registered: ${escapeHtml(c.screening_date || c.created_at || 'Recently')}</span>
+              <span>⚡ Activity: ${escapeHtml(c.activity_level || 'MEDIUM')}</span>
+            </div>
+            ${notesSnippet}
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm btn-load-client" data-client-id="${c.client_id}">
+            <span>Open & Assess &rarr;</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    // Attach load handlers
+    rosterListContainer.querySelectorAll('.btn-load-client').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-client-id');
+        loadClientProfile(id);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag));
+  }
+
+  if (rosterSearchInput) {
+    rosterSearchInput.addEventListener('input', () => renderRosterList());
+  }
+
+  if (btnClientRoster) btnClientRoster.addEventListener('click', openClientRosterModal);
+  if (btnCloseClientRoster) btnCloseClientRoster.addEventListener('click', closeClientRosterModal);
+  if (btnCloseClientRosterBottom) btnCloseClientRosterBottom.addEventListener('click', closeClientRosterModal);
+
+  async function loadClientProfile(clientId) {
+    try {
+      showToast(`Loading client profile [${clientId}]...`, 'info');
+      const res = await fetch(`/api/clients/${clientId}`);
+      if (!res.ok) throw new Error('Client record not found');
+      const data = await res.json();
+      const client = data.client;
+
+      activeClientId = client.client_id;
+      populateFormFromClientData(client);
+      closeClientRosterModal();
+
+      // Scroll to Initial Assessment if in trainer mode
+      if (isTrainer() && secAssessment) {
+        secAssessment.scrollIntoView({ behavior: 'smooth' });
+        showToast(`Loaded ${client.client_name}. Initial Assessment is ready for trainer evaluation.`, 'success');
+      } else {
+        showToast(`Loaded profile for ${client.client_name}.`, 'success');
+      }
+    } catch (e) {
+      console.error('Load client error:', e);
+      showToast('Error loading client: ' + e.message, 'error');
+    }
+  }
+
+  function populateFormFromClientData(data) {
+    Object.keys(data).forEach(key => {
+      const el = form.elements[key];
+      if (el && el.type !== 'radio' && el.type !== 'checkbox') {
+        el.value = data[key] || '';
+      }
+    });
+
+    if (clientNotesInput && data.client_notes !== undefined) {
+      clientNotesInput.value = data.client_notes || '';
+    }
+
+    // Mirror names
+    if (parqClientNameInput) parqClientNameInput.value = data.client_name || '';
+    if (assessClientNameInput) assessClientNameInput.value = data.client_name || '';
+
+    // PAR-Q Questions
+    for (let i = 1; i <= 10; i++) {
+      const val = data[`parq_q${i}`] || 'no';
+      const r = form.querySelector(`input[name="parq_q${i}"][value="${val}"]`);
+      if (r) r.checked = true;
+    }
+
+    // Chosen Tests
+    const tests = Array.isArray(data.chosen_tests) ? data.chosen_tests : [];
+    testChips.forEach(chip => {
+      const tVal = chip.getAttribute('data-test');
+      if (tests.includes(tVal)) {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+
+    // Signature
+    const sigImg = data.client_signature_image;
+    if (sigImg && sigCanvas && sigCtx) {
+      const img = new Image();
+      img.onload = () => {
+        sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+        sigCtx.drawImage(img, 0, 0);
+        hasDrawn = true;
+        if (sigImageInput) sigImageInput.value = sigImg;
+      };
+      img.src = sigImg;
+      if (tabDrawSig) tabDrawSig.click();
+    } else if (data.client_signature) {
+      if (tabTypeSig) tabTypeSig.click();
+      const typedSig = document.getElementById('client_signature');
+      if (typedSig) typedSig.value = data.client_signature;
+    }
+
+    calculateBMI();
+    checkPARQStatus();
+    updateChosenTests();
+    updateProgress();
+    updateRoleUI();
+  }
+
+  // ----------------------------------------------------
+  // 5. DATA SYNCHRONIZATION ACROSS SECTIONS
   // ----------------------------------------------------
   if (clientNameInput) {
     clientNameInput.addEventListener('input', () => {
@@ -155,7 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (learnerNameInput) {
     learnerNameInput.addEventListener('input', () => {
-      if (instructorNameInput) instructorNameInput.value = learnerNameInput.value.trim();
+      if (instructorNameInput && !instructorNameInput.disabled) {
+        instructorNameInput.value = learnerNameInput.value.trim();
+      }
     });
   }
 
@@ -163,13 +548,13 @@ document.addEventListener('DOMContentLoaded', () => {
     screeningDateInput.addEventListener('input', () => {
       const d = screeningDateInput.value.trim();
       if (parqDateInput) parqDateInput.value = d;
-      if (assessDateInput) assessDateInput.value = d;
+      if (assessDateInput && !assessDateInput.disabled) assessDateInput.value = d;
       if (clientSigDateInput) clientSigDateInput.value = d;
     });
   }
 
   // ----------------------------------------------------
-  // 3. BMI AUTO-CALCULATOR
+  // 6. BMI AUTO-CALCULATOR
   // ----------------------------------------------------
   function calculateBMI() {
     if (!heightInput || !weightInput) return;
@@ -179,38 +564,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hRaw > 50 && wRaw > 20) {
       const hM = hRaw / 100.0;
       const bmi = (wRaw / (hM * hM)).toFixed(1);
+
       if (bmiDisplay) bmiDisplay.textContent = bmi;
-
-      let category = 'Normal';
-      let badgeClass = 'badge-bmi bmi-normal';
-      if (bmi < 18.5) {
-        category = 'Underweight';
-        badgeClass = 'badge-bmi';
-      } else if (bmi < 25.0) {
-        category = 'Normal Weight';
-        badgeClass = 'badge-bmi bmi-normal';
-      } else if (bmi < 30.0) {
-        category = 'Overweight';
-        badgeClass = 'badge-bmi bmi-overweight';
-      } else {
-        category = 'Obese';
-        badgeClass = 'badge-bmi bmi-obese';
-      }
-
       if (bmiBadge) {
-        bmiBadge.className = badgeClass;
-        bmiBadge.textContent = category;
+        if (bmi < 18.5) {
+          bmiBadge.textContent = 'Underweight';
+          bmiBadge.style.color = '#60A5FA';
+        } else if (bmi < 25.0) {
+          bmiBadge.textContent = 'Normal Healthy Weight';
+          bmiBadge.style.color = '#34D399';
+        } else if (bmi < 30.0) {
+          bmiBadge.textContent = 'Overweight';
+          bmiBadge.style.color = '#FBBF24';
+        } else {
+          bmiBadge.textContent = 'Obese Class';
+          bmiBadge.style.color = '#F87171';
+        }
       }
 
-      // Auto-suggest in anthropometrics if empty
-      if (anthroResultsInput && (!anthroResultsInput.value || anthroResultsInput.value.startsWith('BMI:'))) {
-        anthroResultsInput.value = `BMI: ${bmi} (${category})`;
+      if (anthroResultsInput && isTrainer() && !anthroResultsInput.value) {
+        anthroResultsInput.value = `BMI: ${bmi}`;
       }
     } else {
       if (bmiDisplay) bmiDisplay.textContent = '--';
       if (bmiBadge) {
-        bmiBadge.className = 'badge-bmi';
         bmiBadge.textContent = 'Awaiting height & weight';
+        bmiBadge.style.color = 'var(--text-muted)';
       }
     }
   }
@@ -219,134 +598,114 @@ document.addEventListener('DOMContentLoaded', () => {
   if (weightInput) weightInput.addEventListener('input', calculateBMI);
 
   // ----------------------------------------------------
-  // 4. PAR-Q SAFETY CHECKER
+  // 7. PAR-Q SAFETY SCREENER VERIFICATION
   // ----------------------------------------------------
   function checkPARQStatus() {
-    let yesCount = 0;
+    let hasYes = false;
+    let answeredCount = 0;
+
     for (let i = 1; i <= 10; i++) {
-      const checked = document.querySelector(`input[name="parq_q${i}"]:checked`);
-      const row = document.querySelector(`.parq-question-row:nth-child(${i})`);
-      if (checked && checked.value === 'yes') {
-        yesCount++;
-        if (row) row.classList.add('flagged');
-      } else {
-        if (row) row.classList.remove('flagged');
+      const checked = form.querySelector(`input[name="parq_q${i}"]:checked`);
+      if (checked) {
+        answeredCount++;
+        if (checked.value === 'yes') hasYes = true;
       }
     }
 
     if (parqStatusBanner) {
-      if (yesCount > 0) {
-        parqStatusBanner.className = 'parq-status-card mb-4 warning';
+      if (hasYes) {
+        parqStatusBanner.className = 'parq-status-card mb-4 alert';
         if (parqIcon) parqIcon.textContent = '⚠️';
-        if (parqTitle) parqTitle.textContent = `MEDICAL CLEARANCE ADVISED (${yesCount} 'YES' RESPONSES)`;
-        if (parqSubtitle) parqSubtitle.textContent = 'Physician consultation or certified exercise physiologist sign-off recommended before vigorous resistance/cardio training.';
-        if (statusItemParq) {
-          statusItemParq.className = 'status-pill status-mand';
-          statusItemParq.innerHTML = `⚠️ PAR-Q: <em>${yesCount} Yes (Referral)</em>`;
-        }
+        if (parqTitle) parqTitle.textContent = 'MEDICAL REFERRAL ADVICE: PHYSICIAN CLEARANCE RECOMMENDED';
+        if (parqSubtitle) parqSubtitle.textContent = 'Client answered YES to one or more questions. Physical activity should be cleared with a doctor prior to high-intensity training.';
       } else {
         parqStatusBanner.className = 'parq-status-card mb-4 safe';
         if (parqIcon) parqIcon.textContent = '🛡️';
         if (parqTitle) parqTitle.textContent = 'CLEARANCE: READY FOR PHYSICAL ACTIVITY';
-        if (parqSubtitle) parqSubtitle.textContent = 'All 10 questions answered NO. Client is clear to initiate structured exercise.';
-        if (statusItemParq) {
-          statusItemParq.className = 'status-pill status-done';
-          statusItemParq.innerHTML = `🛡️ PAR-Q: <em>Clear (All No)</em>`;
-        }
+        if (parqSubtitle) parqSubtitle.textContent = 'All questions answered NO. Client is cleared to proceed with structured baseline physical training.';
       }
     }
-    updateProgress();
   }
 
-  const parqRadios = document.querySelectorAll('input[type="radio"][name^="parq_q"]');
-  parqRadios.forEach(radio => radio.addEventListener('change', checkPARQStatus));
-
-  // ----------------------------------------------------
-  // 5. TEST SELECTION CHIPS & TRAINER IN-LAB ASSESSMENT
-  // ----------------------------------------------------
-  function updateChosenTests() {
-    const activeChips = document.querySelectorAll('.test-chip.active');
-    const selected = [];
-    activeChips.forEach(chip => {
-      const val = chip.getAttribute('data-test');
-      if (val) selected.push(val);
-    });
-
-    if (chosenTestsInput) chosenTestsInput.value = selected.join(',');
-    const count = selected.length;
-
-    if (badgeCountDisplay) badgeCountDisplay.textContent = count > 0 ? `${count} Chosen` : `0 / 3`;
-    if (chosenTestsCount) chosenTestsCount.textContent = count > 0 ? `${count} Tests Conducted` : `Trainer In-Lab (Optional)`;
-
-    if (testSelectionBadge) {
-      if (count >= 3) {
-        testSelectionBadge.classList.add('met');
-      } else {
-        testSelectionBadge.classList.remove('met');
-      }
-    }
-
-    updateProgress();
-  }
-
-  testChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chip.classList.toggle('active');
-      updateChosenTests();
+  const parqRadios = form.querySelectorAll('input[type="radio"][name^="parq_q"]');
+  parqRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      checkPARQStatus();
+      updateProgress();
     });
   });
 
   // ----------------------------------------------------
-  // 6. TOUCH / MOUSE SIGNATURE PAD
+  // 8. TEST SELECTION CHIPS (TRAINER ONLY INTERACTION)
   // ----------------------------------------------------
-  let isDrawing = false;
-  let hasDrawn = false;
-  const sigCtx = sigCanvas ? sigCanvas.getContext('2d') : null;
+  function updateChosenTests() {
+    const active = document.querySelectorAll('.test-chip.active');
+    const tests = [];
+    active.forEach(c => {
+      const t = c.getAttribute('data-test');
+      if (t) tests.push(t);
+    });
 
-  function resizeCanvas() {
-    if (!sigCanvas || !sigCtx) return;
-    const rect = sigCanvas.getBoundingClientRect();
-    if (rect.width > 0 && sigCanvas.width !== Math.round(rect.width)) {
-      let temp = null;
-      if (hasDrawn && sigCanvas.width > 0 && sigCanvas.height > 0) {
-        temp = sigCtx.getImageData(0, 0, sigCanvas.width, sigCanvas.height);
-      }
-      sigCanvas.width = Math.round(rect.width);
-      sigCanvas.height = 130;
+    if (chosenTestsInput) chosenTestsInput.value = JSON.stringify(tests);
+    if (badgeCountDisplay) badgeCountDisplay.textContent = `${tests.length} Selected`;
 
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-      sigCtx.lineWidth = 2.8;
-      sigCtx.lineCap = 'round';
-      sigCtx.lineJoin = 'round';
-      sigCtx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
-
-      if (temp) sigCtx.putImageData(temp, 0, 0);
+    if (chosenTestsCount) {
+      chosenTestsCount.textContent = tests.length > 0 ? `${tests.length} Tests Selected` : 'Trainer In-Lab';
     }
   }
 
-  window.addEventListener('resize', resizeCanvas);
-  setTimeout(resizeCanvas, 100);
+  testChips.forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      // Security: Block chip toggling if user is in Client Mode!
+      if (!isTrainer()) {
+        showToast('Initial Assessment test selection is restricted to authorized trainers.', 'warning');
+        return;
+      }
+      chip.classList.toggle('active');
+      updateChosenTests();
+      updateProgress();
+    });
+  });
 
-  function getCanvasCoords(e) {
-    const rect = sigCanvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e);
-    return {
-      x: (touch.clientX - rect.left) * (sigCanvas.width / rect.width),
-      y: (touch.clientY - rect.top) * (sigCanvas.height / rect.height)
+  // ----------------------------------------------------
+  // 9. SIGNATURE CANVAS & TYPED MODE
+  // ----------------------------------------------------
+  let isDrawing = false;
+  let hasDrawn = false;
+  let sigCtx = null;
+
+  if (sigCanvas) {
+    sigCtx = sigCanvas.getContext('2d');
+    const resizeCanvas = () => {
+      const rect = sigCanvas.getBoundingClientRect();
+      if (rect.width > 0) {
+        sigCanvas.width = 600;
+        sigCanvas.height = 130;
+        sigCtx.lineWidth = 2.5;
+        sigCtx.lineCap = 'round';
+        sigCtx.lineJoin = 'round';
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        sigCtx.strokeStyle = activeTheme === 'light' ? '#0F172A' : '#F2CD73';
+      }
     };
-  }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-  if (sigCanvas && sigCtx) {
+    const getCanvasCoords = (e) => {
+      const rect = sigCanvas.getBoundingClientRect();
+      const scaleX = sigCanvas.width / rect.width;
+      const scaleY = sigCanvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    };
+
     const startDrawing = (e) => {
-      if (e.cancelable) e.preventDefault();
       isDrawing = true;
       hasDrawn = true;
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-      sigCtx.lineWidth = 2.8;
-      sigCtx.lineCap = 'round';
-      sigCtx.lineJoin = 'round';
-      sigCtx.strokeStyle = theme === 'light' ? '#0F172A' : '#F2CD73';
-
       const { x, y } = getCanvasCoords(e);
       sigCtx.beginPath();
       sigCtx.moveTo(x, y);
@@ -360,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sigCtx.stroke();
     };
 
-    const stopDrawing = (e) => {
+    const stopDrawing = () => {
       if (!isDrawing) return;
       isDrawing = false;
       sigCtx.closePath();
@@ -394,7 +753,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tabTypeSig.classList.remove('active');
       drawSigBox.classList.remove('hidden');
       typeSigBox.classList.add('hidden');
-      resizeCanvas();
     });
 
     tabTypeSig.addEventListener('click', () => {
@@ -411,21 +769,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 7. PROGRESS TRACKER
+  // 10. PROGRESS TRACKER
   // ----------------------------------------------------
   function updateProgress() {
     const hasName = clientNameInput && clientNameInput.value.trim().length > 0;
     const isDraw = tabDrawSig && tabDrawSig.classList.contains('active');
     const typedSigEl = document.getElementById('client_signature');
     const hasSig = (isDraw && hasDrawn) || (!isDraw && typedSigEl && typedSigEl.value.trim().length > 0);
+    const hasNotes = clientNotesInput && clientNotesInput.value.trim().length > 0;
 
-    const activeChipsCount = document.querySelectorAll('.test-chip.active').length;
-
-    // Fast-intake weights: Client Name 35%, PAR-Q 35%, Sig 30%
-    // (Initial Assessment is completed by the trainer in-lab, and is optional for intake)
     let percent = 0;
     if (hasName) percent += 35;
-    percent += 35; // 10 questions defaulted to NO
+    percent += 35; // 10 questions answered / defaulted
     if (hasSig) percent += 30;
 
     if (progressPercent) progressPercent.textContent = `${percent}%`;
@@ -450,46 +805,38 @@ document.addEventListener('DOMContentLoaded', () => {
         statusItemSig.innerHTML = '✍️ Signature: <em>Required</em>';
       }
     }
-
-    if (statusItemTests) {
-      if (activeChipsCount > 0) {
-        statusItemTests.className = 'status-pill status-done';
-        statusItemTests.innerHTML = `🎯 Initial Assessment: <em>${activeChipsCount} Tests Chosen</em>`;
-      } else {
-        statusItemTests.className = 'status-pill status-optional';
-        statusItemTests.innerHTML = `🎯 Initial Assessment: <em>Trainer In-Lab (Optional)</em>`;
-      }
-    }
   }
 
-  form.addEventListener('input', updateProgress);
-  form.addEventListener('change', updateProgress);
-
   // ----------------------------------------------------
-  // 8. EXTRACT FORM DATA AS OBJECT
+  // 11. FORM DATA GATHERING
   // ----------------------------------------------------
   function getFormDataObject() {
-    const formData = new FormData(form);
+    const fd = new FormData(form);
     const data = {};
+    fd.forEach((val, key) => { data[key] = val.trim(); });
 
-    formData.forEach((val, key) => {
-      data[key] = val;
-    });
+    // Explicitly grab client notes
+    if (clientNotesInput) {
+      data.client_notes = clientNotesInput.value.trim();
+    }
 
-    // PAR-Q 10 Questions
+    // Set Active Client ID if loaded
+    if (activeClientId) {
+      data.client_id = activeClientId;
+    }
+
+    // PAR-Q Radios
     for (let i = 1; i <= 10; i++) {
       const qKey = `parq_q${i}`;
       const checked = form.querySelector(`input[name="${qKey}"]:checked`);
       data[qKey] = checked ? checked.value : 'no';
     }
 
-    // Client Name fallbacks
     const clientName = (clientNameInput ? clientNameInput.value : '').trim();
     data.client_name = clientName;
     data.parq_client_name = clientName;
     data.assessment_client_name = clientName;
 
-    // Dates
     const todayStr = screeningDateInput ? screeningDateInput.value.trim() : formattedToday;
     data.screening_date = todayStr;
     data.parq_date = todayStr;
@@ -521,7 +868,111 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 9. SAMPLE DATA AUTO-FILL
+  // 12. SAVE / REGISTER CLIENT INTAKE PROFILE
+  // ----------------------------------------------------
+  async function registerClientProfile() {
+    const data = getFormDataObject();
+    if (!data.client_name) {
+      showToast('Please enter the Client Name before saving', 'error');
+      if (clientNameInput) clientNameInput.focus();
+      return;
+    }
+
+    // Role-based Security:
+    // If not in Trainer Mode, strip any Initial Assessment fields before calling /api/register
+    const assessmentFieldNames = [
+      'instructor_name', 'assessment_date', 'chosen_tests',
+      'bp_results', 'bp_reasons', 'anthro_results', 'anthro_reasons',
+      'body_comp_results', 'body_comp_reasons', 'muscular_results', 'muscular_reasons',
+      'cardio_results', 'cardio_reasons', 'rom_results', 'rom_reasons',
+      'posture_results', 'posture_reasons'
+    ];
+
+    if (!isTrainer()) {
+      assessmentFieldNames.forEach(f => {
+        delete data[f];
+      });
+    }
+
+    showToast('Saving client intake registration...', 'info');
+
+    try {
+      const headers = isTrainer() ? getTrainerAuthHeaders() : { 'Content-Type': 'application/json' };
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.error || `HTTP ${res.status}`);
+      }
+
+      if (resData.client && resData.client.client_id) {
+        activeClientId = resData.client.client_id;
+      }
+
+      showToast(`Registration saved for ${data.client_name}! Client Notes stored safely.`, 'success');
+      fetchClientRosterCount();
+    } catch (err) {
+      console.error('Registration error:', err);
+      showToast('Registration failed: ' + err.message, 'error');
+    }
+  }
+
+  if (btnRegisterClient) {
+    btnRegisterClient.addEventListener('click', registerClientProfile);
+  }
+
+  // ----------------------------------------------------
+  // 13. SAVE INITIAL ASSESSMENT (TRAINER ONLY)
+  // ----------------------------------------------------
+  async function saveInitialAssessment() {
+    if (!isTrainer()) {
+      showToast('Unauthorized: Only coaches can save Initial Assessment results.', 'error');
+      return;
+    }
+
+    const data = getFormDataObject();
+    if (!data.client_name) {
+      showToast('Please assign or load a client first.', 'error');
+      if (clientNameInput) clientNameInput.focus();
+      return;
+    }
+
+    showToast('Saving clinical Initial Assessment results...', 'info');
+
+    try {
+      const res = await fetch('/api/trainer/assessment', {
+        method: 'POST',
+        headers: getTrainerAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.error || `HTTP ${res.status}`);
+      }
+
+      if (resData.client && resData.client.client_id) {
+        activeClientId = resData.client.client_id;
+      }
+
+      showToast(`Initial Assessment recorded successfully for ${data.client_name}!`, 'success');
+      fetchClientRosterCount();
+    } catch (err) {
+      console.error('Save assessment error:', err);
+      showToast('Failed to save assessment: ' + err.message, 'error');
+    }
+  }
+
+  if (btnSaveAssessment) {
+    btnSaveAssessment.addEventListener('click', saveInitialAssessment);
+  }
+
+  // ----------------------------------------------------
+  // 14. SAMPLE DATA AUTO-FILL
   // ----------------------------------------------------
   async function fillSampleData() {
     try {
@@ -557,6 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
           exercise_barriers: 'High workload deadlines during sprint weeks. Afternoon fatigue and lack of accountability when training alone.',
           overcome_strategies: 'Schedule fixed morning training slots before work. Pre-pack gym bag evening prior. Shared weekly check-ins with trainer.',
           attitude_motivation_summary: 'Highly driven and goal-oriented. Motivated by physical strength gains, better posture, and energy levels for demanding tech career.',
+          client_notes: 'Primary goal is preparing for an autumn half-marathon while improving thoracic mobility and lower back stability. Prefer 7 AM sessions.',
           instructor_name: 'Keerthan',
           assessment_date: formattedToday,
           chosen_tests: ['digital', 'bmi', 'waist circumference', 'bio-electrical impedance', 'press up', 'rockport walking test', 'hamstrings', 'shoulders'],
@@ -577,46 +1029,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
 
-      // Populate text fields
-      Object.keys(sample).forEach(key => {
-        const el = form.elements[key];
-        if (el && el.type !== 'radio' && el.type !== 'checkbox') {
-          el.value = sample[key];
-        }
-      });
-
-      // Synchronize mirrored names & dates
-      if (parqClientNameInput) parqClientNameInput.value = sample.client_name;
-      if (assessClientNameInput) assessClientNameInput.value = sample.client_name;
-
-      // PAR-Q Radios
-      for (let i = 1; i <= 10; i++) {
-        const val = sample[`parq_q${i}`] || 'no';
-        const r = form.querySelector(`input[name="parq_q${i}"][value="${val}"]`);
-        if (r) r.checked = true;
-      }
-
-      // Set Test Chips
-      const testsToSelect = sample.chosen_tests || [];
-      testChips.forEach(chip => {
-        const tVal = chip.getAttribute('data-test');
-        if (testsToSelect.includes(tVal)) {
-          chip.classList.add('active');
-        } else {
-          chip.classList.remove('active');
-        }
-      });
-
-      // Typed signature mode
-      if (tabTypeSig) tabTypeSig.click();
-      const typedSig = document.getElementById('client_signature');
-      if (typedSig) typedSig.value = sample.client_name;
-
-      calculateBMI();
-      checkPARQStatus();
-      updateChosenTests();
-      updateProgress();
-      showToast('Populated authentic 4-stage assessment sample data', 'success');
+      populateFormFromClientData(sample);
+      showToast('Populated authentic assessment sample data & Client Notes', 'success');
     } catch (e) {
       console.error('Sample data error:', e);
       showToast('Error populating sample data', 'error');
@@ -628,12 +1042,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 10. RESET FORM
+  // 15. RESET FORM
   // ----------------------------------------------------
   if (btnResetForm) {
     btnResetForm.addEventListener('click', () => {
-      if (confirm('Clear all fields across the 4 assessment stages?')) {
+      if (confirm('Clear all fields across the assessment stages?')) {
         form.reset();
+        activeClientId = null;
         if (sigCtx && sigCanvas) {
           sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
           hasDrawn = false;
@@ -649,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 11. 4-PAGE LIVE PREVIEW MODAL
+  // 16. LIVE PREVIEW MODAL
   // ----------------------------------------------------
   async function openLivePreview() {
     if (!previewModal) return;
@@ -663,7 +1078,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const data = getFormDataObject();
 
-      // Attempt server rendering via PyMuPDF (fastest & 100% exact vector)
       let pages = null;
       try {
         const res = await fetch('/api/preview-pdf', {
@@ -676,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pages = json.pages;
         }
       } catch (srvErr) {
-        console.warn('Server preview endpoint unavailable, attempting client fallback:', srvErr);
+        console.warn('Server preview endpoint unavailable, attempting fallback:', srvErr);
       }
 
       if (pages && pages.length >= 4) {
@@ -685,7 +1099,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previewImg3) previewImg3.src = pages[2];
         if (previewImg4) previewImg4.src = pages[3];
       } else {
-        // Fallback: static verification preview pages if server offline
         if (previewImg1) previewImg1.src = 'verify_blank_page1.png';
         if (previewImg2) previewImg2.src = 'verify_blank_page2.png';
         if (previewImg3) previewImg3.src = 'verify_blank_page3.png';
@@ -722,8 +1135,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && previewModal && previewModal.classList.contains('show')) {
-      closeLivePreview();
+    if (e.key === 'Escape') {
+      if (previewModal && previewModal.classList.contains('show')) closeLivePreview();
+      if (trainerAuthModal && trainerAuthModal.classList.contains('show')) closeTrainerAuthModal();
+      if (clientRosterModal && clientRosterModal.classList.contains('show')) closeClientRosterModal();
     }
   });
 
@@ -748,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ----------------------------------------------------
-  // 12. PDF GENERATION & DOWNLOAD
+  // 17. PDF GENERATION & DOWNLOAD
   // ----------------------------------------------------
   async function downloadPDF() {
     const data = getFormDataObject();
@@ -758,7 +1173,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    showToast('Compiling official 4-page assessment PDF...', 'info');
+    showToast('Compiling official Keerthan Strength Lab PDF...', 'info');
 
     try {
       const res = await fetch('/api/generate-pdf', {
@@ -784,7 +1199,6 @@ document.addEventListener('DOMContentLoaded', () => {
       closeLivePreview();
     } catch (err) {
       console.warn('Backend download failed, downloading offline fillable template:', err);
-      // Offline fallback: download template directly
       const a = document.createElement('a');
       a.href = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
       a.download = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
@@ -811,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ----------------------------------------------------
-  // 13. CINEMATIC LOADER LOGIC
+  // 18. CINEMATIC LOADER
   // ----------------------------------------------------
   const loader = document.getElementById('cinematicLoader');
   const loaderProgressBar = document.getElementById('loaderProgressBar');
@@ -848,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 14. TOAST NOTIFICATIONS
+  // 19. TOAST NOTIFICATIONS
   // ----------------------------------------------------
   function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
@@ -856,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : 'ℹ️'));
     toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-msg">${message}</span>`;
     container.appendChild(toast);
 
@@ -867,7 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 15. SECTION NAVIGATION SCROLLSPY & SMOOTH SCROLL
+  // 20. SECTION NAVIGATION SCROLLSPY & SMOOTH SCROLL
   // ----------------------------------------------------
   const navItems = document.querySelectorAll('.section-nav .nav-item');
   const cardSections = document.querySelectorAll('.card-section');
@@ -909,9 +1323,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // Initial calculation check
+  // Initial UI state setup
   calculateBMI();
   checkPARQStatus();
   updateChosenTests();
   updateProgress();
+  updateRoleUI();
 });

@@ -46,6 +46,7 @@ def build_all_pdfs():
         'exercise_barriers': 'High workload deadlines during sprint weeks. Afternoon fatigue and lack of accountability when training alone.',
         'overcome_strategies': 'Schedule fixed morning training slots before work. Pre-pack gym bag evening prior. Shared weekly check-ins with trainer.',
         'attitude_motivation_summary': 'Highly driven and goal-oriented. Motivated by physical strength gains, better posture, and energy levels for demanding tech career.',
+        'client_notes': 'Primary goal is preparing for an autumn half-marathon while improving thoracic mobility and lower back stability. Prefer 7 AM sessions.',
         'instructor_name': 'Keerthan',
         'assessment_date': '27/09/2026',
         'chosen_tests': ['digital', 'bmi', 'bio-electrical impedance', 'press up', 'rockport walking test', 'hamstrings', 'shoulders'],

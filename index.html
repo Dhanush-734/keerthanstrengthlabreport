@@ -101,7 +101,7 @@
             <div class="logo-pulse"></div>
           </div>
           <div class="brand-titles">
-            <div class="badge-portal">OFFICIAL 4-STAGE ASSESSMENT DOSSIER</div>
+            <div class="badge-portal">OFFICIAL ASSESSMENT DOSSIER</div>
             <h1 class="brand-title">KEERTHAN STRENGTH LAB</h1>
             <p class="brand-subtitle">FITNESS &bull; NUTRITION &bull; MINDSET &bull; CLINICAL SCREENING</p>
           </div>
@@ -109,6 +109,21 @@
 
         <!-- Quick Action Bar -->
         <div class="header-actions">
+          <!-- Role Indicator / Trainer Portal -->
+          <div class="role-badge-wrapper" id="roleBadgeWrapper">
+            <button type="button" id="btnTrainerPortal" class="btn btn-secondary btn-trainer-toggle" title="Trainer Mode & Clinical Assessment">
+              <span class="btn-icon">🔑</span>
+              <span id="trainerPortalBtnText">Trainer Portal</span>
+            </button>
+            <button type="button" id="btnClientRoster" class="btn btn-secondary hidden" title="View Registered Clients">
+              <span class="btn-icon">👥</span>
+              <span>Roster (<span id="rosterCount">0</span>)</span>
+            </button>
+            <button type="button" id="btnLogoutTrainer" class="btn btn-ghost hidden" title="Exit Trainer Mode">
+              <span>Exit Trainer Mode</span>
+            </button>
+          </div>
+
           <button type="button" id="themeToggle" class="btn-theme-toggle" aria-label="Toggle Light and Dark Mode" title="Toggle Light / Dark Mode">
             <span class="theme-toggle-track">
               <span class="theme-toggle-icon">🌙</span>
@@ -157,7 +172,7 @@
               🛡️ PAR-Q: <em>10 Questions</em>
             </span>
             <span class="status-pill status-optional" id="statusItemTests">
-              🎯 Initial Assessment: <em id="chosenTestsCount">Trainer In-Lab (Optional)</em>
+              🎯 Initial Assessment: <em id="chosenTestsCount">Trainer In-Lab</em>
             </span>
             <span class="status-pill status-mand" id="statusItemSig">
               ✍️ Signature: <em>Required</em>
@@ -167,23 +182,22 @@
       </div>
     </section>
 
-    <!-- Section Navigation Quick Bar -->
+    <!-- Section Navigation Quick Bar (No numbers) -->
     <nav class="section-nav" aria-label="Section Navigation">
       <a href="#sec-screening" class="nav-item active">
-        <span class="nav-num">1</span>
         <span class="nav-text">Client Screening</span>
       </a>
       <a href="#sec-parq" class="nav-item">
-        <span class="nav-num">2</span>
         <span class="nav-text">PAR-Q (10 Questions)</span>
       </a>
       <a href="#sec-assessment" class="nav-item">
-        <span class="nav-num">3</span>
-        <span class="nav-text">4. Initial Assessment</span>
+        <span class="nav-text">Initial Assessment</span>
       </a>
       <a href="#sec-barriers" class="nav-item">
-        <span class="nav-num">4</span>
         <span class="nav-text">Exercise Barriers</span>
+      </a>
+      <a href="#sec-notes" class="nav-item">
+        <span class="nav-text">Client Notes</span>
       </a>
     </nav>
 
@@ -192,11 +206,10 @@
       <form id="screeningForm" novalidate autocomplete="off">
 
         <!-- =========================================================================
-             SECTION 1: CLIENT SCREENING FORM (Learner to complete with client)
+             CLIENT SCREENING FORM (Learner to complete with client)
              ========================================================================= -->
         <article class="card-section" id="sec-screening">
           <div class="card-header">
-            <div class="sec-number">01</div>
             <div class="sec-title-group">
               <div class="sec-title-row">
                 <h2 class="sec-title">Client Screening Form</h2>
@@ -361,11 +374,10 @@
 
 
         <!-- =========================================================================
-             SECTION 2: PAR-Q (Client to complete)
+             PAR-Q (Client to complete)
              ========================================================================= -->
         <article class="card-section" id="sec-parq">
           <div class="card-header">
-            <div class="sec-number">02</div>
             <div class="sec-title-group">
               <div class="sec-title-row">
                 <h2 class="sec-title">Physical Activity Readiness Questionnaire (PAR-Q)</h2>
@@ -637,21 +649,38 @@
 
 
         <!-- =========================================================================
-             SECTION 3: 4. INITIAL ASSESSMENT (Learner to complete)
+             INITIAL ASSESSMENT (Trainer to complete in lab)
              ========================================================================= -->
         <article class="card-section" id="sec-assessment">
           <div class="card-header">
-            <div class="sec-number">03</div>
             <div class="sec-title-group">
               <div class="sec-title-row">
-                <h2 class="sec-title">4. Initial Assessment</h2>
-                <span class="sec-badge badge-trainer">Completed by Trainer in Lab &bull; Optional for Client Intake</span>
+                <h2 class="sec-title">Initial Assessment</h2>
+                <span class="sec-badge badge-readonly" id="assessRoleBadge">🔒 Trainer Assessment — Read Only</span>
               </div>
-              <p class="sec-desc">Physical Measurements and Fitness Assessments Record. Evaluated and completed in-person by trainer at the lab — clients may leave this section blank during initial intake.</p>
+              <p class="sec-desc">Physical Measurements and Fitness Assessments Record. Evaluated and completed exclusively by the trainer in the lab.</p>
             </div>
           </div>
 
           <div class="card-body">
+
+            <!-- Read-only Notice for Clients -->
+            <div class="assessment-readonly-banner" id="assessReadonlyNotice">
+              <div class="readonly-badge-tag">🔒 Trainer Assessment — Read Only</div>
+              <p class="readonly-desc">This section is evaluated and recorded exclusively by Keerthan Strength Lab coaches in the lab. Recorded test observations and justifications appear below.</p>
+            </div>
+
+            <!-- Trainer Action Bar (Visible in Trainer Mode only) -->
+            <div class="assessment-trainer-toolbar hidden" id="assessTrainerToolbar">
+              <div class="trainer-active-pill">
+                <span class="trainer-pulse-dot"></span>
+                <span>Trainer Mode Active &bull; Full Clinical Edit Access</span>
+              </div>
+              <button type="button" id="btnSaveAssessment" class="btn btn-gold btn-sm">
+                <span class="btn-icon">💾</span>
+                <span>Save Assessment Results</span>
+              </button>
+            </div>
 
             <!-- Administration details -->
             <div class="panel-box mb-4">
@@ -659,8 +688,8 @@
               <div class="grid grid-3">
                 <div class="form-group">
                   <label for="assessment_client_name" class="form-label">Client's Name</label>
-                  <input type="text" id="assessment_client_name" name="assessment_client_name" class="form-control"
-                    placeholder="Will sync from Section 1" readonly>
+                  <input type="text" id="assessment_client_name" name="assessment_client_name" class="form-control is-readonly-field"
+                    placeholder="Will sync from client profile" readonly>
                 </div>
                 <div class="form-group">
                   <label for="instructor_name" class="form-label">Instructor's Name</label>
@@ -679,7 +708,7 @@
             <div class="test-selection-instruction mb-4">
               <div class="instruction-left">
                 <strong>Physical Measurements and Fitness Assessments Record</strong>
-                <p>Click on tests conducted by the trainer to circle them on the official dossier (minimum of three if tests were conducted; trainer completes in lab).</p>
+                <p id="testInstructionText">Trainer selects conducted clinical tests in the lab (minimum of three recommended).</p>
               </div>
               <div class="instruction-badge" id="testSelectionBadge">
                 <span class="badge-count" id="badgeCountDisplay">0 / 3</span>
@@ -897,48 +926,73 @@
 
 
         <!-- =========================================================================
-             SECTION 4: CLIENT'S BARRIERS TO EXERCISE
+             CLIENT'S BARRIERS TO EXERCISE (Compact)
              ========================================================================= -->
         <article class="card-section" id="sec-barriers">
           <div class="card-header">
-            <div class="sec-number">04</div>
             <div class="sec-title-group">
               <div class="sec-title-row">
                 <h2 class="sec-title">Client's Barriers to Exercise</h2>
-                <span class="sec-badge badge-mand">Adherence & Motivational Strategy</span>
+                <span class="sec-badge badge-mand">Adherence Strategy</span>
               </div>
-              <p class="sec-desc">Establish the physical, psychological and social reasons for clients' participation in an exercise program, help clients to identify barriers to adherence and how to overcome them.</p>
+              <p class="sec-desc">Establish reasons for participation, identify barriers to adherence and actionable strategies to overcome them.</p>
             </div>
           </div>
 
-          <div class="card-body">
+          <div class="card-body py-compact">
 
-            <div class="grid grid-2 mb-4">
-              <div class="panel-box">
-                <div class="panel-header">Barriers to exercising and achieving goals including motivational barriers</div>
+            <div class="grid grid-2 gap-compact mb-3">
+              <div class="panel-box panel-compact">
+                <div class="panel-header panel-header-compact">Barriers to exercising and achieving goals including motivational barriers</div>
                 <div class="form-group">
-                  <textarea id="exercise_barriers" name="exercise_barriers" rows="7" class="form-control"
-                    placeholder="Identify key barriers: time constraints, workload, low confidence, lack of childcare, fear of reinjury, poor sleep, afternoon fatigue, inconsistent motivation..."></textarea>
+                  <textarea id="exercise_barriers" name="exercise_barriers" rows="3" class="form-control form-control-compact"
+                    placeholder="Time constraints, workload deadlines, fatigue, confidence, past injury concerns..."></textarea>
                 </div>
               </div>
 
-              <div class="panel-box">
-                <div class="panel-header">Strategies to overcome them</div>
+              <div class="panel-box panel-compact">
+                <div class="panel-header panel-header-compact">Strategies to overcome them</div>
                 <div class="form-group">
-                  <textarea id="overcome_strategies" name="overcome_strategies" rows="7" class="form-control"
-                    placeholder="Actionable solutions: pre-booking early morning sessions, packing workout gear the night before, habit stacking, trainer accountability check-ins, progressive overload milestones..."></textarea>
+                  <textarea id="overcome_strategies" name="overcome_strategies" rows="3" class="form-control form-control-compact"
+                    placeholder="Pre-booking morning sessions, packing workout gear evening before, habit stacking, trainer check-ins..."></textarea>
                 </div>
               </div>
             </div>
 
-            <div class="panel-box">
-              <div class="panel-header">Summary of the client's attitude and motivation to exercise</div>
+            <div class="panel-box panel-compact">
+              <div class="panel-header panel-header-compact">Summary of the client's attitude and motivation to exercise</div>
               <div class="form-group">
-                <textarea id="attitude_motivation_summary" name="attitude_motivation_summary" rows="5" class="form-control"
-                  placeholder="Summarize the client's core psychological drivers, intrinsic vs extrinsic motivators, commitment level, and long-term vision..."></textarea>
+                <textarea id="attitude_motivation_summary" name="attitude_motivation_summary" rows="2" class="form-control form-control-compact"
+                  placeholder="Summarize client's core psychological drivers, intrinsic vs extrinsic motivators, commitment level, and long-term vision..."></textarea>
               </div>
             </div>
 
+          </div>
+        </article>
+
+
+        <!-- =========================================================================
+             CLIENT NOTES / ADDITIONAL INFORMATION
+             ========================================================================= -->
+        <article class="card-section" id="sec-notes">
+          <div class="card-header">
+            <div class="sec-title-group">
+              <div class="sec-title-row">
+                <h2 class="sec-title">Client Notes / Additional Information</h2>
+                <span class="sec-badge badge-optional">Optional</span>
+              </div>
+              <p class="sec-desc">Tell us anything else you'd like your trainer to know.</p>
+            </div>
+          </div>
+
+          <div class="card-body py-compact">
+            <div class="panel-box panel-compact">
+              <div class="form-group">
+                <label for="client_notes" class="form-label">Client Notes & Personal Considerations</label>
+                <textarea id="client_notes" name="client_notes" rows="4" class="form-control form-control-compact"
+                  placeholder="Tell us anything else you'd like your trainer to know (e.g. personal fitness goals, joint or health concerns, scheduling preferences, training background nuances, specific questions, or anything not covered elsewhere in the form)..."></textarea>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -946,11 +1000,15 @@
         <div class="submit-bar">
           <div class="submit-info">
             <span class="info-icon">🛡️</span>
-            <span>All entries will be stamped onto the official 4-page Keerthan Strength Lab Assessment Dossier.</span>
+            <span>All entries will be stamped onto the official Keerthan Strength Lab Assessment Dossier.</span>
           </div>
           <div class="submit-buttons">
+            <button type="button" id="btnRegisterClient" class="btn btn-secondary btn-lg" title="Save profile and client notes to database">
+              <span class="btn-icon">💾</span>
+              <span>Save & Register Intake</span>
+            </button>
             <button type="button" id="btnPreviewBottom" class="btn btn-secondary btn-lg">
-              <span>👁️ Live Preview (4 Pages)</span>
+              <span>👁️ Live Preview</span>
             </button>
             <button type="submit" id="btnDownloadBottom" class="btn btn-gold btn-lg btn-download-trigger">
               <span class="btn-icon">📥</span>
@@ -994,7 +1052,7 @@
           <button type="button" class="btn-tab active" data-page="1">Page 1: Client Screening</button>
           <button type="button" class="btn-tab" data-page="2">Page 2: PAR-Q (10 Qs)</button>
           <button type="button" class="btn-tab" data-page="3">Page 3: Initial Assessment</button>
-          <button type="button" class="btn-tab" data-page="4">Page 4: Barriers to Exercise</button>
+          <button type="button" class="btn-tab" data-page="4">Page 4: Barriers & Notes</button>
         </div>
         <div class="preview-viewer">
           <div class="preview-loading" id="previewLoading">
@@ -1016,6 +1074,59 @@
           <span class="btn-icon">📥</span>
           <span>Download PDF Now</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trainer Authentication Modal -->
+  <div class="modal-backdrop" id="trainerAuthModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Trainer Authentication</h3>
+          <p class="modal-subtitle">Keerthan Strength Lab Coaching Portal</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseTrainerAuth" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="trainerAuthForm" autocomplete="off">
+          <div class="form-group mb-3">
+            <label for="trainerPasscode" class="form-label">Master Trainer Passcode</label>
+            <input type="password" id="trainerPasscode" class="form-control" placeholder="Enter coach passcode..." autocomplete="current-password" required>
+            <span class="form-hint">Default Coach Passcode: <code>keerthan2026</code></span>
+          </div>
+          <div class="modal-actions-row">
+            <button type="button" class="btn btn-secondary" id="btnCancelTrainerAuth">Cancel</button>
+            <button type="submit" class="btn btn-gold" id="btnSubmitTrainerAuth">
+              <span class="btn-icon">🔓</span>
+              <span>Unlock Trainer Access</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Records Roster Modal (Trainer Only) -->
+  <div class="modal-backdrop" id="clientRosterModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Registered Client Records</h3>
+          <p class="modal-subtitle">View intake details, read Client Notes, or complete clinical Initial Assessments.</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnCloseClientRoster" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="roster-search-bar mb-3">
+          <input type="text" id="rosterSearchInput" class="form-control" placeholder="🔍 Search clients by name...">
+        </div>
+        <div class="roster-list-container" id="rosterListContainer">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseClientRosterBottom">Close</button>
       </div>
     </div>
   </div>
