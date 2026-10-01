@@ -1,0 +1,9 @@
+{
+  "name": "keerthan-strength-lab-portal",
+  "version": "1.0.0",
+  "description": "Keerthan Strength Lab - Client Assessment Dossier Portal",
+  "scripts": {
+    "dev": "python server.py",
+    "start": "python server.py"
+  }
+}
