@@ -614,17 +614,235 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previewImg4 && pages[3]) previewImg4.src = pages[3];
   }
 
-  async function renderClientFallbackPages() {
-    // 1. Try rendering official PDF via client-side PDF.js
-    if (window.pdfjsLib) {
+  // ----------------------------------------------------
+  // TEMPLATE ARRAYBUFFER CACHE & CLIENT-SIDE ENGINE
+  // ----------------------------------------------------
+  let cachedTemplateBuffer = null;
+
+  async function getTemplateArrayBuffer() {
+    if (cachedTemplateBuffer) {
+      return cachedTemplateBuffer.slice(0);
+    }
+    const res = await fetch('Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf');
+    if (!res.ok) {
+      throw new Error(`Failed to load PDF template: HTTP ${res.status}`);
+    }
+    cachedTemplateBuffer = await res.arrayBuffer();
+    return cachedTemplateBuffer.slice(0);
+  }
+
+  // Pre-fetch template in background for instant download
+  getTemplateArrayBuffer().catch(err => {
+    console.warn('Background pre-fetch of PDF template failed, will fetch on demand:', err);
+  });
+
+  async function buildFilledPdfBytes(data) {
+    if (!window.PDFLib) {
+      throw new Error('PDFLib library is not available');
+    }
+    const { PDFDocument, rgb, StandardFonts } = window.PDFLib;
+    const templateBytes = await getTemplateArrayBuffer();
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    const form = pdfDoc.getForm();
+
+    // Format metrics
+    let heightFormatted = data.height ? String(data.height).trim() : '';
+    if (heightFormatted && !heightFormatted.toLowerCase().includes('cm')) {
+      heightFormatted = `${heightFormatted} cm`;
+    }
+    let weightFormatted = data.weight ? String(data.weight).trim() : '';
+    if (weightFormatted && !weightFormatted.toLowerCase().includes('kg')) {
+      weightFormatted = `${weightFormatted} kg`;
+    }
+
+    const todayStr = (screeningDateInput ? screeningDateInput.value.trim() : '') || formattedToday;
+    const clientName = data.client_name || data.full_name || '';
+
+    const textFields = {
+      // Page 1
+      learner_name: data.learner_name || '',
+      screening_date: data.screening_date || todayStr,
+      client_name: clientName,
+      gender: data.gender || '',
+      height: heightFormatted,
+      weight: weightFormatted,
+      age: data.age ? String(data.age) : '',
+      health_risk_factors: data.health_risk_factors || '',
+      medical_history: data.medical_history || '',
+      medications: data.medications || '',
+      occupation: data.occupation || '',
+      time_availability: data.time_availability || '',
+      lifestyle_summary: data.lifestyle_summary || '',
+      activity_level: data.activity_level || 'MEDIUM',
+      training_history: data.training_history || '',
+      exercise_contraindications: data.exercise_contraindications || '',
+      exercise_likes: data.exercise_likes || '',
+      exercise_dislikes: data.exercise_dislikes || '',
+
+      // Page 2
+      parq_client_name: clientName,
+      parq_date: data.parq_date || todayStr,
+      client_signature_date: data.client_signature_date || data.parq_signature_date || todayStr,
+
+      // Page 3
+      assessment_client_name: clientName,
+      instructor_name: data.instructor_name || data.learner_name || '',
+      assessment_date: data.assessment_date || todayStr,
+      bp_results: data.bp_results || '',
+      bp_reasons: data.bp_reasons || '',
+      anthro_results: data.anthro_results || '',
+      anthro_reasons: data.anthro_reasons || '',
+      body_comp_results: data.body_comp_results || '',
+      body_comp_reasons: data.body_comp_reasons || '',
+      muscular_results: data.muscular_results || '',
+      muscular_reasons: data.muscular_reasons || '',
+      cardio_results: data.cardio_results || '',
+      cardio_reasons: data.cardio_reasons || '',
+      rom_results: data.rom_results || '',
+      rom_reasons: data.rom_reasons || '',
+      posture_results: data.posture_results || '',
+      posture_reasons: data.posture_reasons || '',
+
+      // Page 4
+      exercise_barriers: data.exercise_barriers || '',
+      overcome_strategies: data.overcome_strategies || '',
+      attitude_motivation_summary: data.attitude_motivation_summary || '',
+      client_notes: data.client_notes || ''
+    };
+
+    for (const [key, value] of Object.entries(textFields)) {
       try {
-        const loadingTask = pdfjsLib.getDocument('Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf');
+        const field = form.getTextField(key);
+        if (field) {
+          field.setText(String(value));
+        }
+      } catch (e) {
+        // Field not present in AcroForm
+      }
+    }
+
+    // Page 2: Stamp 10 PAR-Q answers and signature
+    const pages = pdfDoc.getPages();
+    const p2 = pages[1];
+    const { height: pHeight } = p2.getSize();
+
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const colorRed = rgb(0.75, 0.0, 0.0);
+    const colorBlue = rgb(0.12, 0.31, 0.47);
+    const colorWhite = rgb(1, 1, 1);
+
+    const qRows = [
+      { top: 157.8, h: 26 },
+      { top: 183.8, h: 20 },
+      { top: 203.8, h: 20 },
+      { top: 223.8, h: 20 },
+      { top: 243.8, h: 20 },
+      { top: 263.8, h: 26 },
+      { top: 289.8, h: 26 },
+      { top: 315.8, h: 20 },
+      { top: 335.8, h: 26 },
+      { top: 361.8, h: 20 }
+    ];
+
+    qRows.forEach((row, idx) => {
+      const qNum = idx + 1;
+      const ans = String(data[`parq_q${qNum}`] || 'no').trim().toLowerCase();
+      const isYes = ans === 'yes';
+      const text = isYes ? 'YES' : 'NO';
+      const pdfY = pHeight - row.top - row.h;
+
+      // Cover existing "Yes/No" text with clean white rectangle
+      p2.drawRectangle({
+        x: 502,
+        y: pdfY + 1,
+        width: 56,
+        height: row.h - 2,
+        color: colorWhite
+      });
+
+      // Draw bold YES or NO
+      p2.drawText(text, {
+        x: isYes ? 511 : 513,
+        y: pdfY + (row.h / 2) - 3.5,
+        size: 7.8,
+        font: fontBold,
+        color: isYes ? colorRed : colorBlue
+      });
+    });
+
+    // Signature Box: top 504.4, h 30, left 36, w 385
+    const sigPdfY = pHeight - 504.4 - 30;
+    let sigDrawn = false;
+
+    if (data.client_signature_image && data.client_signature_image.startsWith('data:image')) {
+      try {
+        const base64Data = data.client_signature_image.split(',')[1];
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const sigPng = await pdfDoc.embedPng(bytes);
+        const scale = Math.min(320 / sigPng.width, 24 / sigPng.height, 1);
+        const sw = sigPng.width * scale;
+        const sh = sigPng.height * scale;
+
+        p2.drawImage(sigPng, {
+          x: 46,
+          y: sigPdfY + (30 - sh) / 2,
+          width: sw,
+          height: sh
+        });
+        sigDrawn = true;
+      } catch (err) {
+        console.warn('Could not embed PNG signature:', err);
+      }
+    }
+
+    if (!sigDrawn && data.client_signature) {
+      const timesItalic = await pdfDoc.embedFont(StandardFonts.TimesRomanBoldItalic);
+      p2.drawText(data.client_signature, {
+        x: 46,
+        y: sigPdfY + 9,
+        size: 13,
+        font: timesItalic,
+        color: rgb(0.08, 0.08, 0.08)
+      });
+    }
+
+    // Flatten form so all fields become permanent, non-editable vector text across all mobile PDF readers
+    form.flatten();
+
+    return await pdfDoc.save();
+  }
+
+  function triggerBlobDownload(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (document.body.contains(a)) {
+        document.body.removeChild(a);
+      }
+      window.URL.revokeObjectURL(url);
+    }, 2000);
+  }
+
+  async function renderClientFallbackPages(filledBytes) {
+    // 1. Try rendering official filled PDF via client-side PDF.js
+    if (window.pdfjsLib && filledBytes) {
+      try {
+        const loadingTask = pdfjsLib.getDocument({ data: filledBytes });
         const pdfDoc = await loadingTask.promise;
         const rendered = [];
         const count = Math.min(4, pdfDoc.numPages);
         for (let i = 1; i <= count; i++) {
           const page = await pdfDoc.getPage(i);
-          const viewport = page.getViewport({ scale: 1.75 });
+          const viewport = page.getViewport({ scale: 1.5 });
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
           canvas.height = viewport.height;
@@ -636,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return rendered;
         }
       } catch (pdfErr) {
-        console.warn('Client PDF.js render fallback:', pdfErr);
+        console.warn('Client PDF.js render fallback error:', pdfErr);
       }
     }
 
@@ -678,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Requirement 7: Show professional loading indicator only while rendering
     if (previewLoading) {
-      if (previewLoadingText) previewLoadingText.textContent = 'Loading page...';
+      if (previewLoadingText) previewLoadingText.textContent = 'Rendering live dossier preview...';
       previewLoading.style.display = 'flex';
     }
     if (previewErrorBox) previewErrorBox.classList.add('hidden');
@@ -686,21 +904,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       let pages = null;
-      try {
-        const res = await fetch('/api/preview-pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: currentKey
-        });
-        if (res.ok) {
-          const json = await res.json();
-          pages = json.pages;
-        } else {
-          throw new Error(`Server returned HTTP ${res.status}`);
+
+      // 1. Render directly from client-side filled PDF bytes
+      if (window.PDFLib) {
+        try {
+          const filledBytes = await buildFilledPdfBytes(data);
+          pages = await renderClientFallbackPages(filledBytes);
+        } catch (libErr) {
+          console.warn('Client live preview build failed, falling back to server:', libErr);
         }
-      } catch (srvErr) {
-        console.warn('Server preview error, falling back to client-side vector preview:', srvErr);
-        pages = await renderClientFallbackPages();
+      }
+
+      // 2. Fallback to server preview if client didn't generate pages
+      if (!pages || pages.length < 4) {
+        try {
+          const res = await fetch('/api/preview-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: currentKey
+          });
+          if (res.ok) {
+            const json = await res.json();
+            pages = json.pages;
+          }
+        } catch (srvErr) {
+          console.warn('Server preview error:', srvErr);
+        }
+      }
+
+      // 3. Fallback to assets if still incomplete
+      if (!pages || pages.length < 4) {
+        pages = await renderClientFallbackPages(null);
       }
 
       if (pages && pages.length >= 4) {
@@ -719,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Preview error:', err);
       if (previewLoading) previewLoading.style.display = 'none';
       if (previewStage) previewStage.style.opacity = '0.1';
-      // Requirement 8: Clean error handling without freezing modal
+      // Clean error handling without freezing modal
       if (previewErrorBox) previewErrorBox.classList.remove('hidden');
       showToast('Unable to preview this page. Please try downloading the PDF.', 'error');
     }
@@ -730,7 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
     previewModal.classList.remove('show');
     previewModal.setAttribute('aria-hidden', 'true');
 
-    // Requirement 2 & 5: Restore background page scrolling cleanly
+    // Restore background page scrolling cleanly
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
   }
@@ -770,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ----------------------------------------------------
-  // 13. DOWNLOAD OFFICIAL PDF
+  // 13. DOWNLOAD OFFICIAL PDF (GUARANTEED NEVER BLANK)
   // ----------------------------------------------------
   async function downloadPDF() {
     const data = getFormDataObject();
@@ -817,6 +1051,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showToast('Compiling official Keerthan Strength Lab Dossier PDF...', 'info');
 
+    const cleanName = data.client_name.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `Keerthan_Strength_Lab_Assessment_${cleanName}.pdf`;
+
+    // 1. Primary generation: Client-side PDFLib (instant, completely filled, flattened, offline-capable)
+    if (window.PDFLib) {
+      try {
+        const pdfBytes = await buildFilledPdfBytes(data);
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        triggerBlobDownload(blob, filename);
+        showToast('Downloaded official filled PDF dossier successfully!', 'success');
+        return;
+      } catch (clientErr) {
+        console.warn('Client-side PDF build error, attempting backend server:', clientErr);
+      }
+    }
+
+    // 2. Secondary fallback: Backend API
     try {
       const res = await fetch('/api/generate-pdf', {
         method: 'POST',
@@ -829,25 +1080,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const cleanName = data.client_name.replace(/[^a-zA-Z0-9_-]/g, '_');
-      a.download = `Keerthan_Strength_Lab_Assessment_${cleanName}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      showToast('Downloaded official PDF successfully!', 'success');
-    } catch (err) {
-      console.warn('Backend download failed, downloading offline fillable template:', err);
-      const a = document.createElement('a');
-      a.href = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
-      a.download = 'Keerthan_Strength_Lab_Client_Screening_Form_Fillable.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('Downloaded official fillable PDF template', 'info');
+      triggerBlobDownload(blob, filename);
+      showToast('Downloaded official PDF dossier successfully!', 'success');
+    } catch (serverErr) {
+      console.error('All PDF generation methods failed:', serverErr);
+      showToast('Could not compile PDF. Please check connection and try again.', 'error');
     }
   }
 
