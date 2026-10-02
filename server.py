@@ -12,6 +12,11 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/help')
+@app.route('/help.html')
+def help_page():
+    return send_from_directory('.', 'help.html')
+
 @app.route('/api/health')
 @app.route('/health')
 def health():

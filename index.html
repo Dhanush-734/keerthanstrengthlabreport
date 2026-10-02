@@ -126,9 +126,17 @@
             <span class="btn-icon">🔄</span>
             <span>Reset</span>
           </button>
+          <a href="help.html" class="btn btn-ghost" title="Mobile Download & Share Help" target="_blank">
+            <span class="btn-icon">❓</span>
+            <span>Help Guide</span>
+          </a>
           <button type="button" id="btnOpenPreview" class="btn btn-secondary" title="Preview all 4 pages">
             <span class="btn-icon">👁️</span>
             <span>Preview (4 Pages)</span>
+          </button>
+          <button type="button" id="btnShareHeader" class="btn btn-secondary btn-share-trigger" title="Share PDF via WhatsApp, AirDrop or Mail">
+            <span class="btn-icon">📤</span>
+            <span>Share PDF</span>
           </button>
           <button type="button" id="btnDownloadHeader" class="btn btn-gold btn-download-trigger">
             <span class="btn-icon">📥</span>
@@ -906,10 +914,18 @@
           <div class="submit-info">
             <span class="info-icon">🛡️</span>
             <span>All entries will be stamped onto the official Keerthan Strength Lab Assessment Dossier.</span>
+            <a href="help.html" target="_blank" class="help-guide-badge" title="Open Mobile Download & Share Guide">
+              <span>📱</span>
+              <span>Need Help? iPhone & Android Guide</span>
+            </a>
           </div>
           <div class="submit-buttons">
             <button type="button" id="btnPreviewBottom" class="btn btn-secondary btn-lg">
               <span>👁️ Live Preview</span>
+            </button>
+            <button type="button" id="btnShareBottom" class="btn btn-secondary btn-lg btn-share-trigger" title="Share via WhatsApp or AirDrop">
+              <span class="btn-icon">📤</span>
+              <span>Share PDF</span>
             </button>
             <button type="submit" id="btnDownloadBottom" class="btn btn-gold btn-lg btn-download-trigger">
               <span class="btn-icon">📥</span>
@@ -924,6 +940,13 @@
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-content">
+        <div class="footer-help-container">
+          <a href="help.html" class="btn-footer-help" title="Mobile Download & Sharing Guide for iPhone & Android" target="_blank">
+            <span class="help-btn-icon">📱</span>
+            <span>Mobile Download & Sharing Help Guide (iOS & Android)</span>
+            <span class="help-btn-arrow">➔</span>
+          </a>
+        </div>
         <p>&copy; 2026 Keerthan Strength Lab. All rights reserved. Precision Coaching & Assessment Systems.</p>
         <div class="developer-credit">
           <span>Developed by</span>
@@ -983,10 +1006,55 @@
       <!-- Fixed Footer -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btnClosePreviewBottom">Close</button>
+        <button type="button" class="btn btn-secondary btn-share-trigger" id="btnShareFromModal" title="Share Official PDF">
+          <span class="btn-icon">📤</span>
+          <span>Share PDF</span>
+        </button>
         <button type="button" class="btn btn-gold" id="btnDownloadFromModal">
           <span class="btn-icon">📥</span>
           <span>Download PDF Now</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Ready & Share Modal (Solves iPhone / Mobile Blob URL sharing) -->
+  <div class="modal-backdrop" id="pdfReadyModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-share">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 class="modal-title">Official PDF Dossier Ready</h3>
+          <p class="modal-subtitle">Share directly via WhatsApp, Mail, AirDrop or save to your device.</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="btnClosePdfReady" aria-label="Close Dialog">&times;</button>
+      </div>
+      <div class="modal-body-share">
+        <div class="pdf-ready-card">
+          <div class="pdf-card-icon">📄</div>
+          <div class="pdf-card-meta">
+            <span class="pdf-card-name" id="readyPdfName">Keerthan_Strength_Lab_Assessment.pdf</span>
+            <span class="pdf-card-badge">Official Flattened 4-Page Dossier</span>
+          </div>
+        </div>
+
+        <div class="share-actions-group">
+          <button type="button" class="btn btn-gold btn-lg btn-action-full" id="btnActionShare">
+            <span class="btn-icon">📤</span>
+            <span>Share PDF (WhatsApp / AirDrop / Mail)</span>
+          </button>
+          <button type="button" class="btn btn-secondary btn-lg btn-action-full" id="btnActionDownload">
+            <span class="btn-icon">📥</span>
+            <span>Download / Save to Files</span>
+          </button>
+        </div>
+
+        <div class="ios-sharing-tip">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span class="tip-badge">💡 iPhone & Android Tip</span>
+            <a href="help.html" target="_blank" style="color: #60A5FA; font-size: 0.78rem; text-decoration: underline; font-weight: 600;">View Help Guide ➔</a>
+          </div>
+          <p>Tapping <strong>Share PDF</strong> attaches the real document directly to WhatsApp or AirDrop. No broken URLs or 404 links.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -999,6 +1067,10 @@
     </button>
     <button type="button" class="fab-btn" id="fabThemeToggle" title="Toggle Light / Dark Theme">
       <span id="fabThemeIcon">☀️</span>
+    </button>
+    <button type="button" class="fab-btn fab-pill btn-share-trigger" id="fabShare" title="Share Official PDF">
+      <span>📤</span>
+      <span class="fab-label">Share</span>
     </button>
     <button type="button" class="fab-btn fab-pill fab-gold btn-download-trigger" id="fabDownload" title="Download Official PDF">
       <span>📥</span>

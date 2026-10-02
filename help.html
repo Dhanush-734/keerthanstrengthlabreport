@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Download & Sharing Guide | Keerthan Strength Lab</title>
+  <meta name="description"
+    content="Official guide for iPhone and Android users to download, save, and share the Keerthan Strength Lab Assessment PDF dossier without broken URL errors.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Dedicated Help Guide Styling */
+    .help-page-container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 30px 20px 80px;
+    }
+
+    .help-top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 36px;
+      gap: 16px;
+    }
+
+    .help-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .help-brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-400);
+      object-fit: cover;
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .help-brand-title {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--text-gold);
+      text-transform: uppercase;
+    }
+
+    .help-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .help-hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .help-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: rgba(230, 186, 85, 0.12);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-300);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .help-hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      line-height: 1.25;
+    }
+
+    .help-hero p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Platform Switcher Chips */
+    .platform-nav-chips {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .chip-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .chip-nav-btn:hover,
+    .chip-nav-btn.active {
+      border-color: var(--gold-400);
+      background: rgba(230, 186, 85, 0.12);
+      color: var(--gold-200);
+      box-shadow: 0 4px 16px rgba(230, 186, 85, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Warning Callout Box */
+    .help-callout-warning {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-left: 4px solid var(--danger);
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 44px;
+    }
+
+    .help-callout-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .help-callout-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #F87171;
+    }
+
+    .help-callout-body {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Guide Sections */
+    .guide-section {
+      margin-bottom: 56px;
+      scroll-margin-top: 40px;
+    }
+
+    .guide-section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-icon-badge {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .guide-section-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    /* Methods Grid */
+    .methods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 22px;
+      margin-bottom: 28px;
+    }
+
+    .method-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .method-card:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    }
+
+    .method-card.featured {
+      border-color: var(--gold-400);
+      background: linear-gradient(180deg, rgba(230, 186, 85, 0.08) 0%, var(--bg-card) 100%);
+    }
+
+    .method-badge {
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: var(--gold-500);
+      color: #07090C;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    .method-number {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--gold-400);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .method-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .method-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 18px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+    }
+
+    .method-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .step-bullet {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(230, 186, 85, 0.15);
+      color: var(--gold-300);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .method-tip {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .method-tip strong {
+      color: #60A5FA;
+    }
+
+    /* FAQ Section */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      transition: border-color 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: var(--border-gold);
+    }
+
+    .faq-question {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .faq-answer {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Bottom Action Banner */
+    .help-bottom-banner {
+      margin-top: 60px;
+      padding: 36px 28px;
+      background: linear-gradient(135deg, rgba(230, 186, 85, 0.12) 0%, rgba(11, 14, 20, 0.85) 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .help-banner-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .help-banner-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .help-top-nav {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .help-nav-actions {
+        justify-content: space-between;
+      }
+      .methods-grid {
+        grid-template-columns: 1fr;
+      }
+      .help-hero h1 {
+        font-size: 1.65rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="help-page-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="help-top-nav">
+      <a href="index.html" class="help-brand-group">
+        <img src="logo_circle.png" alt="Keerthan Strength Lab" class="help-brand-logo">
+        <span class="help-brand-title">Keerthan Strength Lab</span>
+      </a>
+
+      <div class="help-nav-actions">
+        <button type="button" id="themeToggle" class="btn btn-ghost theme-toggle-btn" aria-label="Toggle Theme">
+          <span class="theme-toggle-switch">
+            <span class="theme-toggle-icon">☀️</span>
+            <span class="theme-toggle-thumb"></span>
+          </span>
+          <span class="theme-toggle-text" id="themeLabel">Dark</span>
+        </button>
+
+        <a href="index.html" class="btn btn-gold" id="btnBackToForm">
+          <span class="btn-icon">←</span>
+          <span>Back to Assessment</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="help-hero">
+      <div class="help-badge">📱 Mobile User Guide</div>
+      <h1>How to Download & Share Your Assessment Dossier</h1>
+      <p>
+        Learn how to export and share your official 4-page Keerthan Strength Lab assessment PDF
+        via WhatsApp, AirDrop, or Mail without broken link or "Not Found URL" errors.
+      </p>
+    </section>
+
+    <!-- Platform Anchor Switcher -->
+    <nav class="platform-nav-chips" aria-label="Device Navigation">
+      <a href="#ios-section" class="chip-nav-btn active">
+        <span>🍏</span>
+        <span>iPhone & iPad (iOS)</span>
+      </a>
+      <a href="#android-section" class="chip-nav-btn">
+        <span>🤖</span>
+        <span>Android Devices</span>
+      </a>
+      <a href="#troubleshooting-section" class="chip-nav-btn">
+        <span>⚠️</span>
+        <span>Why "Not Found URL" Happens</span>
+      </a>
+      <a href="#faq-section" class="chip-nav-btn">
+        <span>❓</span>
+        <span>Common Questions (FAQ)</span>
+      </a>
+    </nav>
+
+    <!-- Why "Not Found URL" Occurs Callout -->
+    <div class="help-callout-warning" id="troubleshooting-section">
+      <div class="help-callout-header">
+        <span style="font-size: 1.4rem;">⚠️</span>
+        <span class="help-callout-title">Why does iPhone give "Not Found URL" when sharing?</span>
+      </div>
+      <p class="help-callout-body">
+        When an iPhone user taps the Safari Share button while viewing a generated PDF, Safari mistakenly shares the temporary internal memory link (starting with <code>blob:https://...</code>) instead of the actual document file.
+        <strong>Blob links only exist on that specific phone in memory</strong> — when your coach or friend clicks that link on their phone, it displays <em>"URL Not Found" / 404</em>.
+        <br><br>
+        <strong>The Solution:</strong> Always use the portal's built-in <strong>📤 Share PDF</strong> button or share the physical file from your iPhone's <strong>Files</strong> app.
+      </p>
+    </div>
+
+    <!-- =========================================================================
+         SECTION 1: IPHONE & IPAD (iOS)
+         ========================================================================= -->
+    <section class="guide-section" id="ios-section">
+      <div class="guide-section-header">
+        <span class="section-icon-badge">🍏</span>
+        <h2 class="guide-section-title">iPhone & iPad (iOS) Step-by-Step Guide</h2>
+      </div>
+
+      <div class="methods-grid">
+        <!-- Method 1: Direct Share PDF -->
+        <article class="method-card featured">
+          <span class="method-badge">Recommended</span>
+          <span class="method-number">Method 1</span>
+          <h3 class="method-title">Tap "Share PDF" (One-Touch WhatsApp)</h3>
+          <ul class="method-steps">
+            <li class="method-step">
+              <span class="step-bullet">1</span>
+              <span>Fill in your details and draw or type your signature on the form.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">2</span>
+              <span>Tap the gold <strong>📤 Share PDF</strong> button in the submit bar or header.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">3</span>
+              <span>The native iOS Share Sheet will slide up showing the real <code>.pdf</code> document attached.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">4</span>
+              <span>Tap <strong>WhatsApp</strong>, <strong>AirDrop</strong>, <strong>Messages</strong>, or <strong>Mail</strong>.</span>
+            </li>
+          </ul>
+          <div class="method-tip">
+            <strong>✅ Result:</strong> Your recipient receives the physical PDF document in their chat. No broken web links!
+          </div>
+        </article>
+
+        <!-- Method 2: Share from iPhone Files App -->
+        <article class="method-card">
+          <span class="method-number">Method 2</span>
+          <h3 class="method-title">Share Saved PDF via iPhone "Files" App</h3>
+          <ul class="method-steps">
+            <li class="method-step">
+              <span class="step-bullet">1</span>
+              <span>Tap <strong>📥 Download PDF</strong> on the portal to save the file.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">2</span>
+              <span>Open the built-in <strong>Files</strong> app 📁 (blue folder icon) on your iPhone.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">3</span>
+              <span>Go to <strong>Browse ➔ Downloads</strong> (or <em>On My iPhone > Downloads</em>).</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">4</span>
+              <span><strong>Tap and hold (long press)</strong> the <code>Keerthan_Strength_Lab_Assessment...pdf</code> file.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">5</span>
+              <span>Tap <strong>Share</strong> in the popup menu ➔ select <strong>WhatsApp</strong> or <strong>AirDrop</strong>.</span>
+            </li>
+          </ul>
+          <div class="method-tip">
+            <strong>💡 Pro-Tip:</strong> The Files app always sends the complete 4-page vector PDF with your signature permanently locked.
+          </div>
+        </article>
+
+        <!-- Method 3: Safari Options Setting -->
+        <article class="method-card">
+          <span class="method-number">Method 3</span>
+          <h3 class="method-title">Safari Browser "Send as PDF" Setting</h3>
+          <ul class="method-steps">
+            <li class="method-step">
+              <span class="step-bullet">1</span>
+              <span>If you downloaded and opened the PDF in Safari, tap the Safari <strong>Share</strong> icon (square with arrow up).</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">2</span>
+              <span>At the top of the Share Sheet below the title, tap <strong>Options</strong>.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">3</span>
+              <span>Under <em>Send As</em>, select <strong>PDF</strong> (do NOT leave it on "Automatic").</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">4</span>
+              <span>Tap <strong>Done</strong>, then select WhatsApp or Mail.</span>
+            </li>
+          </ul>
+          <div class="method-tip">
+            <strong>🛡️ Why this works:</strong> Forcing "PDF" prevents Safari from sending an invalid web link to the recipient.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 2: ANDROID DEVICES
+         ========================================================================= -->
+    <section class="guide-section" id="android-section">
+      <div class="guide-section-header">
+        <span class="section-icon-badge">🤖</span>
+        <h2 class="guide-section-title">Android Devices Step-by-Step Guide</h2>
+      </div>
+
+      <div class="methods-grid">
+        <!-- Android Method 1 -->
+        <article class="method-card featured">
+          <span class="method-badge">Recommended</span>
+          <span class="method-number">Method 1</span>
+          <h3 class="method-title">Tap "Share PDF" (Direct App Share)</h3>
+          <ul class="method-steps">
+            <li class="method-step">
+              <span class="step-bullet">1</span>
+              <span>Complete all fields on the assessment form and sign.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">2</span>
+              <span>Tap <strong>📤 Share PDF</strong>.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">3</span>
+              <span>The Android System Share Sheet appears.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">4</span>
+              <span>Select <strong>WhatsApp</strong>, <strong>Google Drive</strong>, or <strong>Gmail</strong>.</span>
+            </li>
+          </ul>
+          <div class="method-tip">
+            <strong>✅ Instant Delivery:</strong> Android attaches the complete PDF document directly to your selected chat or email.
+          </div>
+        </article>
+
+        <!-- Android Method 2 -->
+        <article class="method-card">
+          <span class="method-number">Method 2</span>
+          <h3 class="method-title">Direct Download & Files Storage</h3>
+          <ul class="method-steps">
+            <li class="method-step">
+              <span class="step-bullet">1</span>
+              <span>Tap <strong>📥 Generate & Download Official PDF</strong>.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">2</span>
+              <span>The PDF downloads immediately to your phone's storage.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">3</span>
+              <span>Swipe down your top notification bar to tap the completed download, OR open <strong>Files by Google / My Files ➔ Downloads</strong>.</span>
+            </li>
+            <li class="method-step">
+              <span class="step-bullet">4</span>
+              <span>Tap the <strong>Share</strong> icon next to the file to send it to anyone.</span>
+            </li>
+          </ul>
+          <div class="method-tip">
+            <strong>💡 Chrome Note:</strong> If Google Chrome displays <em>"File might be harmful... download anyway?"</em>, tap <strong>Download anyway</strong>. It is 100% safe.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION 3: FAQ
+         ========================================================================= -->
+    <section class="guide-section" id="faq-section">
+      <div class="guide-section-header">
+        <span class="section-icon-badge">❓</span>
+        <h2 class="guide-section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <h4 class="faq-question"><span>📄</span> Does the downloaded PDF contain all 4 pages and my signature?</h4>
+          <p class="faq-answer">
+            Yes, 100%. The system compiles all 4 official Keerthan Strength Lab assessment pages, including Client Screening, PAR-Q questions, read-only trainer metrics, and your legal signature. The document is permanently flattened into vector text so nothing is lost.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h4 class="faq-question"><span>🖨️</span> How can I print the PDF from my mobile device?</h4>
+          <p class="faq-answer">
+            Tap the <strong>📤 Share PDF</strong> button (or open the saved PDF in your Files app), scroll down the share menu options, and tap <strong>Print</strong>. On iPhone, this uses AirPrint; on Android, it connects to your WiFi or default cloud printer.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h4 class="faq-question"><span>🔒</span> Is my assessment data stored on any external server?</h4>
+          <p class="faq-answer">
+            No. The document generation runs client-side in your own browser using secure vector PDF compilation. Your health data, PAR-Q answers, and signature remain private on your device.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Action Banner -->
+    <div class="help-bottom-banner">
+      <h3 class="help-banner-title">Ready to Fill Out Your Assessment?</h3>
+      <p class="help-banner-desc">Return to the portal to preview your dossier in real-time and export your official PDF document.</p>
+      <a href="index.html" class="btn btn-gold btn-lg">
+        <span class="btn-icon">←</span>
+        <span>Return to Screening & Assessment Portal</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer" style="margin-top: 48px; border-top: 1px solid var(--border-subtle); padding-top: 24px;">
+      <div class="footer-content">
+        <p>&copy; 2026 Keerthan Strength Lab. All rights reserved. Precision Coaching & Assessment Systems.</p>
+        <div class="developer-credit">
+          <span>Developed by</span>
+          <a href="https://www.instagram.com/__.dhxnush.__/" target="_blank" rel="noopener noreferrer" class="dev-link" title="Instagram: @__.dhxnush.__">
+            <svg class="dev-insta-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            <span>Dhanush</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Theme Toggle Script for Help Page -->
+  <script>
+    (function () {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeLabel = document.getElementById('themeLabel');
+
+      function getPreferredTheme() {
+        return localStorage.getItem('ksl_theme') || 'dark';
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ksl_theme', theme);
+        if (themeLabel) themeLabel.textContent = theme === 'light' ? 'Light' : 'Dark';
+      }
+
+      applyTheme(getPreferredTheme());
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+          const current = document.documentElement.getAttribute('data-theme') || 'dark';
+          const target = current === 'dark' ? 'light' : 'dark';
+          applyTheme(target);
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

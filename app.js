@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnPreviewBottom = document.getElementById('btnPreviewBottom');
   const btnDownloadHeader = document.getElementById('btnDownloadHeader');
   const btnDownloadBottom = document.getElementById('btnDownloadBottom');
+  const btnShareHeader = document.getElementById('btnShareHeader');
+  const btnShareBottom = document.getElementById('btnShareBottom');
   const fabPreview = document.getElementById('fabPreview');
+  const fabShare = document.getElementById('fabShare');
   const fabDownload = document.getElementById('fabDownload');
 
   // Theme Elements
@@ -65,7 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewScrollArea = document.getElementById('previewScrollArea');
   const btnClosePreview = document.getElementById('btnClosePreview');
   const btnClosePreviewBottom = document.getElementById('btnClosePreviewBottom');
+  const btnShareFromModal = document.getElementById('btnShareFromModal');
   const btnDownloadFromModal = document.getElementById('btnDownloadFromModal');
+
+  // PDF Ready & Share Modal Elements (iPhone & Mobile Share Support)
+  const pdfReadyModal = document.getElementById('pdfReadyModal');
+  const readyPdfName = document.getElementById('readyPdfName');
+  const btnClosePdfReady = document.getElementById('btnClosePdfReady');
+  const btnActionShare = document.getElementById('btnActionShare');
+  const btnActionDownload = document.getElementById('btnActionDownload');
   const previewLoading = document.getElementById('previewLoading');
   const previewLoadingText = document.getElementById('previewLoadingText');
   const previewErrorBox = document.getElementById('previewErrorBox');
@@ -816,21 +827,41 @@ document.addEventListener('DOMContentLoaded', () => {
     return await pdfDoc.save();
   }
 
+  let activeBlobUrl = null;
+  let cachedPdfPayload = null; // { blob, file, filename }
+
   function triggerBlobDownload(blob, filename) {
+    if (activeBlobUrl) {
+      // Revoke previous URL only when a new download is initiated
+      window.URL.revokeObjectURL(activeBlobUrl);
+    }
     const url = window.URL.createObjectURL(blob);
+    activeBlobUrl = url;
+
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
+
+    // Clean up DOM node
     setTimeout(() => {
       if (document.body.contains(a)) {
         document.body.removeChild(a);
       }
-      window.URL.revokeObjectURL(url);
-    }, 2000);
+      // CRITICAL FOR IOS / IPHONE:
+      // NEVER revoke the blob URL here on a 2-second timer.
+      // In iOS Safari, revoking the URL immediately causes Safari's Share Sheet
+      // and download system to fail with "URL Not Found"!
+    }, 1500);
   }
+
+  window.addEventListener('beforeunload', () => {
+    if (activeBlobUrl) {
+      window.URL.revokeObjectURL(activeBlobUrl);
+    }
+  });
 
   async function renderClientFallbackPages(filledBytes) {
     // 1. Try rendering official filled PDF via client-side PDF.js
@@ -1004,9 +1035,67 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ----------------------------------------------------
-  // 13. DOWNLOAD OFFICIAL PDF (GUARANTEED NEVER BLANK)
+  // 13. PDF GENERATION, SHARING & DOWNLOADING
   // ----------------------------------------------------
-  async function downloadPDF() {
+
+  function openPdfReadyModal(pdfData) {
+    if (!pdfReadyModal) return;
+    if (readyPdfName && pdfData.filename) {
+      readyPdfName.textContent = pdfData.filename;
+    }
+    pdfReadyModal.classList.add('show');
+    pdfReadyModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePdfReadyModal() {
+    if (!pdfReadyModal) return;
+    pdfReadyModal.classList.remove('show');
+    pdfReadyModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (btnClosePdfReady) {
+    btnClosePdfReady.addEventListener('click', closePdfReadyModal);
+  }
+  if (pdfReadyModal) {
+    pdfReadyModal.addEventListener('click', (e) => {
+      if (e.target === pdfReadyModal) closePdfReadyModal();
+    });
+  }
+
+  if (btnActionShare) {
+    btnActionShare.addEventListener('click', async () => {
+      if (!cachedPdfPayload) return;
+      const { file, filename } = cachedPdfPayload;
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: filename,
+            text: 'Keerthan Strength Lab Official Assessment Dossier'
+          });
+          closePdfReadyModal();
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Share error:', err);
+          }
+        }
+      } else {
+        showToast('Direct file sharing is not supported by your current browser. Use Download instead.', 'info');
+      }
+    });
+  }
+
+  if (btnActionDownload) {
+    btnActionDownload.addEventListener('click', () => {
+      if (!cachedPdfPayload) return;
+      triggerBlobDownload(cachedPdfPayload.blob, cachedPdfPayload.filename);
+      showToast('Downloading official PDF dossier...', 'info');
+    });
+  }
+
+  async function preparePdfBlobAndFile() {
     const data = getFormDataObject();
     if (!data.client_name) {
       if (previewModal && previewModal.classList.contains('show')) {
@@ -1017,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clientNameInput.focus();
         clientNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      return;
+      return null;
     }
 
     const hasSignature = Boolean(
@@ -1046,10 +1135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const drawBox = document.getElementById('drawSigBox');
         if (drawBox) drawBox.classList.add('sig-invalid');
       }
-      return;
+      return null;
     }
-
-    showToast('Compiling official Keerthan Strength Lab Dossier PDF...', 'info');
 
     const cleanName = data.client_name.replace(/[^a-zA-Z0-9_-]/g, '_');
     const filename = `Keerthan_Strength_Lab_Assessment_${cleanName}.pdf`;
@@ -1059,9 +1146,9 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const pdfBytes = await buildFilledPdfBytes(data);
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        triggerBlobDownload(blob, filename);
-        showToast('Downloaded official filled PDF dossier successfully!', 'success');
-        return;
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        cachedPdfPayload = { blob, file, filename };
+        return cachedPdfPayload;
       } catch (clientErr) {
         console.warn('Client-side PDF build error, attempting backend server:', clientErr);
       }
@@ -1080,12 +1167,60 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const blob = await res.blob();
-      triggerBlobDownload(blob, filename);
-      showToast('Downloaded official PDF dossier successfully!', 'success');
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      cachedPdfPayload = { blob, file, filename };
+      return cachedPdfPayload;
     } catch (serverErr) {
       console.error('All PDF generation methods failed:', serverErr);
       showToast('Could not compile PDF. Please check connection and try again.', 'error');
+      return null;
     }
+  }
+
+  async function downloadPDF() {
+    showToast('Compiling official Keerthan Strength Lab Dossier PDF...', 'info');
+    const pdfData = await preparePdfBlobAndFile();
+    if (!pdfData) return;
+
+    const { blob, filename } = pdfData;
+    triggerBlobDownload(blob, filename);
+    showToast('Downloaded official filled PDF dossier successfully!', 'success');
+
+    // On mobile devices (iPhone/iPad/Android), also show the Share modal so user can share directly
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isMobile) {
+      setTimeout(() => {
+        openPdfReadyModal(pdfData);
+      }, 500);
+    }
+  }
+
+  async function sharePDF() {
+    showToast('Preparing official PDF for sharing...', 'info');
+    const pdfData = await preparePdfBlobAndFile();
+    if (!pdfData) return;
+
+    const { file, filename } = pdfData;
+
+    // Check if Web Share API with files is supported (supported on iOS 14+ Safari and mobile Chrome)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: filename,
+          text: 'Keerthan Strength Lab Official Client Assessment Dossier'
+        });
+        showToast('Shared official PDF successfully!', 'success');
+        return;
+      } catch (shareErr) {
+        if (shareErr.name === 'AbortError') return; // User closed the native share sheet
+        console.warn('Native share failed, falling back to modal:', shareErr);
+      }
+    }
+
+    // Fallback: Open the PDF Ready Modal
+    openPdfReadyModal(pdfData);
   }
 
   if (btnDownloadHeader) btnDownloadHeader.addEventListener('click', downloadPDF);
@@ -1097,6 +1232,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (btnDownloadFromModal) btnDownloadFromModal.addEventListener('click', downloadPDF);
   if (fabDownload) fabDownload.addEventListener('click', downloadPDF);
+
+  if (btnShareHeader) btnShareHeader.addEventListener('click', sharePDF);
+  if (btnShareBottom) {
+    btnShareBottom.addEventListener('click', (e) => {
+      e.preventDefault();
+      sharePDF();
+    });
+  }
+  if (btnShareFromModal) btnShareFromModal.addEventListener('click', sharePDF);
+  if (fabShare) fabShare.addEventListener('click', sharePDF);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();

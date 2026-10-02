@@ -3829,3 +3829,185 @@ body {
   color: var(--text-secondary);
   border: 1px solid rgba(148, 163, 184, 0.25);
 }
+
+/* ==========================================================================
+   OFFICIAL PDF READY & SHARE MODAL (IOS SAFARI SHARE FIX)
+   ========================================================================== */
+
+.modal-dialog-share {
+  max-width: 500px;
+  width: 92%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-card, #12141a);
+  border: 1px solid var(--border-subtle, rgba(230, 186, 85, 0.2));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-body-share {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pdf-ready-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(230, 186, 85, 0.08);
+  border: 1px solid rgba(230, 186, 85, 0.25);
+  border-radius: 12px;
+}
+
+.pdf-card-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pdf-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.pdf-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+  word-break: break-all;
+}
+
+.pdf-card-badge {
+  font-size: 0.75rem;
+  color: var(--gold-400, #E6BA55);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.share-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-action-full {
+  width: 100%;
+  justify-content: center;
+  min-height: 48px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ios-sharing-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #94A3B8);
+}
+
+.ios-sharing-tip p {
+  margin: 0;
+}
+
+.ios-sharing-tip strong {
+  color: var(--text-primary, #ffffff);
+}
+
+.ios-sharing-tip .tip-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #60A5FA;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   HELP GUIDE LINK & FOOTER BADGE
+   ========================================================================== */
+
+.help-guide-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(230, 186, 85, 0.12);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-300);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.help-guide-badge:hover {
+  background: rgba(230, 186, 85, 0.22);
+  color: var(--gold-100);
+  border-color: var(--gold-400);
+  transform: translateY(-1px);
+}
+
+.footer-help-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.btn-footer-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: rgba(230, 186, 85, 0.08);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-300);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.btn-footer-help:hover {
+  background: rgba(230, 186, 85, 0.18);
+  border-color: var(--gold-400);
+  color: #FFFFFF;
+  box-shadow: 0 4px 18px rgba(230, 186, 85, 0.2);
+  transform: translateY(-2px);
+}
+
+.help-btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.btn-footer-help:hover .help-btn-arrow {
+  transform: translateX(3px);
+}
+
